@@ -4,15 +4,19 @@
  */
 
 import { Router } from 'express';
-// TODO: import
-// import { ContractDocumentController } from '../controllers/contractDocument.controller';
+import { ContractDocumentController } from '../controllers/contractDocument.controller';
+import { ContractDocumentService } from '../services/contractDocument.service';
+import { ContractDocumentRepository } from '../repositories/contractDocument.repository';
+// TODO: 추후 구현 시 import
 // import { contractDocumentUpload, validateTotalSize } from '../middleware/upload.middleware';
 // import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 
-// TODO: Controller 인스턴스 생성 (의존성 주입)
-// const controller = new ContractDocumentController(service);
+// 의존성 주입
+const repository = new ContractDocumentRepository();
+const service = new ContractDocumentService(repository);
+const controller = new ContractDocumentController(service);
 
 // TODO: 인증 미들웨어 적용 (필요시)
 // router.use(authMiddleware);
@@ -27,7 +31,7 @@ const router = Router();
  * GET /contractDocuments/draft
  * 계약서 추가 시 계약 목록 조회
  */
-// router.get('/draft', controller.getDraftContracts);
+router.get('/draft', controller.getDraftContracts);
 
 /**
  * POST /contractDocuments/upload
