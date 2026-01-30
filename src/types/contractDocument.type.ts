@@ -30,6 +30,21 @@ export interface Contract {}
 // ============================================
 // 요청 DTO
 // ============================================
+// GET /contractDocuments 쿼리 파라미터
+export interface ContractListQuery {
+  page?: number;
+  pageSize?: number;
+  searchBy?: 'contractName' | 'userName';
+  keyword?: string;
+}
+
+// export interface ContractListQuery {
+//   page?: number | undefined;
+//   pageSize?: number | undefined;
+//   searchBy?: 'contractName' | 'userName' | undefined;
+//   keyword?: string | undefined;
+// }
+
 // TODO: UploadContractDocumentDto - 계약서 업로드 요청
 // - contractId: 계약 ID (필수)
 // - files: 업로드 파일 배열 (multer)
@@ -45,11 +60,28 @@ export interface DraftContractResponseDto {
   data: string; // "차량모델 - 고객명 고객님" 형식
 }
 
-// TODO: ContractListResponseDto - 계약 목록 응답
-// GET /contractDocuments 용
-// - contracts: Contract[]
-// - total: 전체 개수
-export interface ContractListResponseDto {}
+// GET /contractDocuments 응답
+export interface ContractDocumentItem {
+  id: number;
+  fileName: string;
+}
+
+export interface ContractListItem {
+  id: number;
+  contractName: string;
+  resolutionDate: string; // ISO 8601 형식
+  documentCount: number;
+  userName: string;
+  carNumber: string;
+  documents: ContractDocumentItem[];
+}
+
+export interface ContractListResponseDto {
+  currentPage: number;
+  totalPages: number;
+  totalItemCount: number;
+  data: ContractListItem[];
+}
 
 // TODO: ContractDocumentResponseDto - 업로드 결과 응답
 // POST /contractDocuments/upload 용
