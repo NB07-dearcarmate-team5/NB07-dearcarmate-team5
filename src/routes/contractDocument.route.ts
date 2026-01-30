@@ -25,7 +25,7 @@ const controller = new ContractDocumentController(service);
  * GET /contractDocuments
  * 계약서 업로드 시 계약 목록 조회
  */
-// router.get('/', controller.getContracts);
+router.get('/', controller.getContracts);
 
 /**
  * GET /contractDocuments/draft
