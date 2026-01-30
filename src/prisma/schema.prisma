@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -30,7 +29,7 @@ model User {
   contracts         Contract[]
 
   created_at        DateTime @default(now())
-  updated_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
 }
 
 //회사정보
@@ -42,9 +41,15 @@ model Company {
   cars         Car[]
   customers    Customer[]
   created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 }
 
+//Car status
+enum CarStatus {
+  POSSESSION          // 보유 중
+  CONTRACT_PROCEEDING // 계약 진행 중
+  CONTRACT_COMPLETED  // 계약 완료
+}
 //차량정보
 model Car {
   id                  Int      @id @default(autoincrement())
@@ -56,7 +61,7 @@ model Car {
   mileage             Int      // 주행거리
   price               BigInt   // 가격(원)
   accidentCount       Int      @default(0) // 사고횟수
-  status              String   @default("possession") // possession | contractProceeding | contractCompleted
+  status              CarStatus   @default(POSSESSION)
   explanation         String?  @db.Text // 차량 설명
   accidentDetails     String?  @db.Text // 사고상세내역
   // 관계 설정: 차량은 특정 회사에 귀속됨
@@ -67,11 +72,16 @@ model Car {
   updated_at    DateTime @updatedAt
 }
 
+//Customer gender
+enum Gender {
+  MALE
+  FEMALE
+}
 //고객정보
 model Customer {
   id             Int      @id @default(autoincrement())
   name           String   // 고객명
-  gender         String   // male | female
+  gender         Gender   // male | female
   phoneNumber    String   // 연락처 (010 누락 방지를 위해 String)
   email          String   
   ageGroup       String?  // 연령대 (선택)
@@ -87,20 +97,29 @@ model Customer {
   updated_at     DateTime @updatedAt
 }
 
+//Contract status
+enum ContractStatus {
+carInspection
+priceNegotiation
+contractDraft
+contractSuccessful
+contractFailed
+}
+
 //계약정보
 model Contract {
   id            Int      @id @default(autoincrement())
-  // 관계 설정
+  contractPrice   BigInt   // 명세서의 contractPrice (큰 금액 대비 BigInt)
+  resolutionDate  DateTime? // 명세서의 resolutionDate (계약 결정일)
+  status          ContractStatus   // 명세서의 status
+
+    // 관계 설정
   carId           Int      // 선택한 차량
   car             Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
   customerId      Int      // 선택한 고객
   customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   userId          Int      // 담당자 (User)
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  contractPrice   BigInt   // 명세서의 contractPrice (큰 금액 대비 BigInt)
-  resolutionDate  DateTime? // 명세서의 resolutionDate (계약 결정일)
-  status          String   // 명세서의 status
   alarms          Alarm[] // 미팅 일정들 (최대 3개)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
