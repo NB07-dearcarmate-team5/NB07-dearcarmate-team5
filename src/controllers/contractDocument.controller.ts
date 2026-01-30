@@ -5,6 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { ContractDocumentService } from '../services/contractDocument.service';
+import { ContractListQuery } from '../types/contractDocument.type';
 
 // ============================================
 // ContractDocumentController
@@ -16,14 +17,17 @@ export class ContractDocumentController {
   // GET /contractDocuments
   // 계약서 업로드 시 계약 목록 조회
   // ==========================================
-  // TODO: getContracts
-  // 응답: 200 OK + ContractListResponseDto
   getContracts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // TODO: 구현
-      // 1. service.getContracts() 호출
-      // 2. 200 응답 반환
-      throw new Error('Not implemented');
+      const query: ContractListQuery = {
+        page: req.query.page ? Number(req.query.page) : undefined,
+        pageSize: req.query.pageSize ? Number(req.query.pageSize) : undefined,
+        searchBy: req.query.searchBy as 'contractName' | 'userName' | undefined,
+        keyword: req.query.keyword as string | undefined,
+      };
+
+      const result = await this.service.getContracts(query);
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
