@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET || 'access-secret';
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret';
 
-export const generateAccessToken = (payload: { userId: number; companyId: number }) => {
+export const generateAccessToken = (payload: { userId: number; companyId: number; isAdmin: boolean }) => {
   return jwt.sign(payload, ACCESS_SECRET, { expiresIn: '1h' });
 };
 
@@ -13,7 +13,7 @@ export const generateRefreshToken = (payload: { userId: number }) => {
 
 export const verifyAccessToken = (token: string) => {
   try {
-    return jwt.verify(token, ACCESS_SECRET) as { userId: number; companyId: number };
+    return jwt.verify(token, ACCESS_SECRET) as { userId: number; companyId: number; isAdmin: boolean };
   } catch (error) {
     return null;
   }
