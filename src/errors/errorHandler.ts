@@ -18,7 +18,7 @@ export const errorHandler = (
   // 정의된 커스텀 에러 처리(400, 401, 403, 404)
   if (err instanceof CustomError) {
     return res.status(err.statusCode).json({
-      succese: false,
+      success: false,
       message: err.message,
     });
   }
@@ -26,7 +26,7 @@ export const errorHandler = (
   // 그 외 예상하지 못한 에러 처리 (500)
   console.error('예상치 못한 에러 발생:', err);
   return res.status(500).json({
-    succese: false,
+    success: false,
     message: '서버 내부 에러가 발생하였습니다.',
   });
 };

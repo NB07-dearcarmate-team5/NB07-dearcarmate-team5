@@ -25,7 +25,7 @@ export class NotFoundError extends CustomError {
 }
 
 export class ConflictError extends CustomError {
-  constructor(message: string = '이미 존재하는 데이터 입니다.') {
+  constructor(message: string = '중복된 데이터가 존재합니다.') {
     super(message, 409);
   }
 }
