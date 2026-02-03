@@ -8,6 +8,12 @@ export class AuthRepository {
     });
   }
 
+  async findByEmployeeNumber(employeeNumber: string) {
+    return await prisma.user.findUnique({
+      where: { employeeNumber },
+    });
+  }
+
   async findById(id: number) {
     return await prisma.user.findUnique({
       where: { id },
@@ -23,6 +29,7 @@ export class AuthRepository {
   async createUser(data: Prisma.UserCreateInput) {
     return await prisma.user.create({
       data,
+      include: { company: true },
     });
   }
 

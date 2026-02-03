@@ -7,6 +7,7 @@ import {
   verifyRefreshToken 
 } from '../utils/token';
 import { SignUpType } from '../structs/user.struct';
+import { User } from '../models/user.model';
 
 export class AuthService {
   private authRepository = new AuthRepository();
@@ -25,6 +26,11 @@ export class AuthService {
       throw new ConflictError('이미 존재하는 이메일입니다.');
     }
 
+    const existingEmployee = await this.authRepository.findByEmployeeNumber(data.employeeNumber);
+    if (existingEmployee) {
+      throw new ConflictError('이미 등록된 사원 번호입니다.');
+    }
+
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const newUser = await this.authRepository.createUser({
@@ -36,8 +42,7 @@ export class AuthService {
       company: { connect: { id: company.id } },
     });
 
-    const { password, refreshToken, ...result } = newUser;
-    return result;
+    return new User(newUser);
   }
 
   async login(email: string, password: string) {
