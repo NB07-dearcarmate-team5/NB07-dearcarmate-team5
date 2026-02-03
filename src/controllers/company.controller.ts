@@ -11,6 +11,7 @@ import {
   findCompaniesService,
   getCompanyUsersService,
   updateCompanyService,
+  deleteCompanyService,
 } from '../services/company.service';
 
 // 생성
@@ -24,7 +25,7 @@ export const createCompany = async (req: Request, res: Response) => {
 
 // 조회
 export const findCompanies = async (req: Request, res: Response) => {
-  const validated = create(req.body, SearchByCompany);
+  const validated = create(req.query, SearchByCompany);
 
   const companies = await findCompaniesService(validated);
 
@@ -33,7 +34,7 @@ export const findCompanies = async (req: Request, res: Response) => {
 
 // 회사별 유저 조회
 export const getCompanyUsers = async (req: Request, res: Response) => {
-  const validated = create(req.body, SearchByUsers);
+  const validated = create(req.query, SearchByUsers);
 
   const users = await getCompanyUsersService(validated);
 
@@ -43,8 +44,18 @@ export const getCompanyUsers = async (req: Request, res: Response) => {
 // 회사 수정
 export const updateCompany = async (req: Request, res: Response) => {
   const validated = create(req.body, UpdateField);
+  const companyId = Number(req.params.companyId);
 
-  const updateCompany = await updateCompanyService(validated);
+  const updateCompany = await updateCompanyService(validated, companyId);
 
   res.status(200).json({ data: updateCompany });
+};
+
+// 회사 삭제
+export const deleteCompany = async (req: Request, res: Response) => {
+  const companyId = Number(req.params.companyId);
+
+  await deleteCompanyService(companyId);
+
+  res.status(204).end();
 };

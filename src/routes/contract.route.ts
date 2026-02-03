@@ -5,7 +5,7 @@ import {
   getCustomers,
   getUsers,
 } from '../controllers/contract.controller';
-import { authenticateToken } from '../middleware/authenticateToken';
+import { authenticateToken } from '../middlewares/authenticateToken';
 
 const contractRouter = express.Router();
 

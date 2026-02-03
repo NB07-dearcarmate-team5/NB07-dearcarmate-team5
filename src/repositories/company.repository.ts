@@ -1,6 +1,14 @@
 import prisma from '../prisma/prisma';
 import { Prisma } from '@prisma/client';
 
+export const findCompany = async (companyId: number) => {
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+  });
+
+  return company;
+};
+
 // 기업코드 중복 확인용
 export const findCompanyByCode = async (companyCode: string) => {
   const company = await prisma.company.findUnique({
@@ -108,4 +116,34 @@ const buildUserSearchWhere = (
         ],
       };
   }
+};
+
+export const updateCompanyRepo = async (
+  companyId: number,
+  companyName?: string,
+  companyCode?: string,
+) => {
+  const updateCompany = await prisma.company.update({
+    where: { id: companyId },
+    data: {
+      ...(companyName !== undefined && { companyName }),
+      ...(companyCode !== undefined && { companyCode }),
+    },
+    select: {
+      id: true,
+      companyName: true,
+      companyCode: true,
+      _count: {
+        select: { users: true }, // 명세서의 userCount를 위해 사용
+      },
+    },
+  });
+
+  return updateCompany;
+};
+
+export const deleteCompanyRepo = async (companyId: number) => {
+  await prisma.company.delete({
+    where: { id: companyId },
+  });
 };

@@ -1,4 +1,4 @@
-import { ConflictError } from '../errors/errors';
+import { ConflictError, NotFoundError } from '../errors/errors';
 import {
   AdminUserListResponseDto,
   CompanyListResponseDto,
@@ -9,12 +9,20 @@ import {
   findCompanyByCode,
   findCompaniesRepo,
   getCompanyUsersRepo,
+  findCompany,
+  updateCompanyRepo,
+  deleteCompanyRepo,
 } from '../repositories/company.repository';
 import {
   SearchByCompanyType,
   SearchByUsersType,
   UpdateFieldType,
 } from '../structs/company.struct';
+
+const validateCompanyExists = async (companyId: number) => {
+  const company = await findCompany(companyId);
+  if (!company) throw new NotFoundError('회사 정보가 없습니다.');
+};
 
 // 회사 등록
 export const createCompanyService = async (
@@ -61,4 +69,24 @@ export const getCompanyUsersService = async (params: SearchByUsersType) => {
   return new AdminUserListResponseDto(users, totalCount, page, pageSize);
 };
 
-export const updateCompanyService = async (params: UpdateFieldType) => {};
+export const updateCompanyService = async (
+  params: UpdateFieldType,
+  companyId: number,
+) => {
+  const { companyName, companyCode } = params;
+
+  await validateCompanyExists(companyId); // 회사 존재 여부 검사
+
+  const updateCompany = await updateCompanyRepo(
+    companyId,
+    companyName,
+    companyCode,
+  );
+
+  return updateCompany;
+};
+
+export const deleteCompanyService = async (companyId: number) => {
+  await validateCompanyExists(companyId);
+  await deleteCompanyRepo(companyId);
+};
