@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/user.controller';
-import { authenticateToken } from '../middleware/authenticateToken';
-import { validate } from '../middleware/validation';
+import { authenticateToken } from '../middlewares/authenticateToken';
+import { validate } from '../middlewares/validation';
 import { UpdateUserStruct } from '../structs/user.struct';
 import { AuthController } from '../controllers/auth.controller';
 import { SignUpStruct } from '../structs/user.struct';

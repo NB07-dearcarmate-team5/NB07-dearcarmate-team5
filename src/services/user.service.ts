@@ -7,22 +7,23 @@ import { UpdateUserType } from '../structs/user.struct';
 
 export class UserService {
   private userRepository = new UserRepository();
+  private async isUser (userId: number) {
+  const user = await this.userRepository.findById(userId);
+  if (!user) {
+    throw new NotFoundError('존재하지 않는 사용자입니다.');
+  }
+
+  return user;
+}
 
   async getUserProfile(userId: number) {
-    const user = await this.userRepository.findById(userId);
-
-    if (!user) {
-      throw new NotFoundError('존재하지 않는 사용자입니다.');
-    }
+    const user = await this.isUser(userId);
 
     return new User(user);
   }
 
   async updateUser(userId: number, updateData: UpdateUserType) {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundError('존재하지 않는 사용자입니다.');
-    }
+    const user = await this.isUser(userId);
 
     const isPasswordValid = await bcrypt.compare(updateData.currentPassword, user.password);
     if (!isPasswordValid) {
@@ -45,10 +46,7 @@ export class UserService {
   }
 
   async deleteUser(userId: number) {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundError('존재하지 않는 사용자입니다.');
-    }
+    await this.isUser(userId);
 
     await this.userRepository.delete(userId);
     return { message: '유저 삭제 성공' };
