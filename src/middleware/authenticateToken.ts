@@ -19,6 +19,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   req.user = {
     userId: decoded.userId,
     companyId: decoded.companyId,
+    isAdmin: decoded.isAdmin
   };
 
   next();

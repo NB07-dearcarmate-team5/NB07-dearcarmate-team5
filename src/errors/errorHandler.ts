@@ -9,14 +9,14 @@ export const errorHandler = (
 ) => {
   if (err instanceof CustomError) {
     return res.status(err.statusCode).json({
-      succese: false,
+      success: false,
       message: err.message,
     });
   }
 
   console.error('예상치 못한 에러 발생:', err);
   return res.status(500).json({
-    succese: false,
+    success: false,
     message: '서버 내부 에러가 발생하였습니다.',
   });
 };
