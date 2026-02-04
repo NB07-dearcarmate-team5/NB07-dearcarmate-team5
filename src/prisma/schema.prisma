@@ -112,30 +112,36 @@ model Contract {
   id            Int      @id @default(autoincrement())
   contractPrice   BigInt   // 명세서의 contractPrice (큰 금액 대비 BigInt)
   resolutionDate  DateTime? // 명세서의 resolutionDate (계약 결정일)
-  status          ContractStatus   // 명세서의 status
+  status          ContractStatus  @default(carInspection) // 명세서의 status
 
-    // 관계 설정
+// 관계 설정
   carId           Int      // 선택한 차량
   car             Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
   customerId      Int      // 선택한 고객
   customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   userId          Int      // 담당자 (User)
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  alarms          Alarm[] // 미팅 일정들 (최대 3개)
+  meetings        Meeting[] // 미팅 일정들 (최대 3개)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
 
+model Meeting {
+  id         Int      @id @default(autoincrement())
+  contractId Int
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  date       DateTime // 미팅 실제 일시 (예: 2/22 12:00)
+  alrams     Alarm[]  // 한 미팅에 여러 알람 가능
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+// 알람 모델 (정확한 알림 시각 저장)
 model Alarm {
-  id              Int      @id @default(autoincrement())
-  // 어느 계약에 속한 일정인지
-  contractId      Int
-  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  // 미팅 정보
-  date            DateTime // 선택한 날짜와 시간
-  // 알람 설정 (체크박스)
-  isMorningAlarm  Boolean  @default(false) // 당일 오전 9시 알림
-  isYesterdayAlarm Boolean  @default(false) // 작일 오전 9시 알림
+  id         Int      @id @default(autoincrement())
+  meetingId  Int
+  meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  alarmTime  DateTime // 알림이 울릴 시각 (예: 2/21 09:00)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }

@@ -80,7 +80,7 @@ CREATE TABLE "Contract" (
     "id" SERIAL NOT NULL,
     "contractPrice" BIGINT NOT NULL,
     "resolutionDate" TIMESTAMP(3),
-    "status" "ContractStatus" NOT NULL,
+    "status" "ContractStatus" NOT NULL DEFAULT 'carInspection',
     "carId" INTEGER NOT NULL,
     "customerId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -91,12 +91,21 @@ CREATE TABLE "Contract" (
 );
 
 -- CreateTable
-CREATE TABLE "Alarm" (
+CREATE TABLE "Meeting" (
     "id" SERIAL NOT NULL,
     "contractId" INTEGER NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
-    "isMorningAlarm" BOOLEAN NOT NULL DEFAULT false,
-    "isYesterdayAlarm" BOOLEAN NOT NULL DEFAULT false,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Meeting_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Alarm" (
+    "id" SERIAL NOT NULL,
+    "meetingId" INTEGER NOT NULL,
+    "alarmTime" TIMESTAMP(3) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -137,4 +146,7 @@ ALTER TABLE "Contract" ADD CONSTRAINT "Contract_customerId_fkey" FOREIGN KEY ("c
 ALTER TABLE "Contract" ADD CONSTRAINT "Contract_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Alarm" ADD CONSTRAINT "Alarm_contractId_fkey" FOREIGN KEY ("contractId") REFERENCES "Contract"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_contractId_fkey" FOREIGN KEY ("contractId") REFERENCES "Contract"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Alarm" ADD CONSTRAINT "Alarm_meetingId_fkey" FOREIGN KEY ("meetingId") REFERENCES "Meeting"("id") ON DELETE CASCADE ON UPDATE CASCADE;
