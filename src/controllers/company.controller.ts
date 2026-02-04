@@ -45,7 +45,7 @@ export const getCompanyUsers = async (req: Request, res: Response) => {
 // 회사 수정
 export const updateCompany = async (req: Request, res: Response) => {
   const validated = create(req.body, UpdateField);
-  const companyId = Number(req.params.companyId);
+  const { companyId } = create(req.params, CompanyIdParams);
 
   const updateCompany = await updateCompanyService(validated, companyId);
 

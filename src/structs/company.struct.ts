@@ -8,6 +8,7 @@ import {
   optional,
   Infer,
   refine,
+  min,
 } from 'superstruct';
 
 // 생성
@@ -18,7 +19,9 @@ export const newCompany = object({
 
 export type NewCompanyType = Infer<typeof newCompany>;
 
-const NumberFromString = coerce(integer(), string(), (value) => Number(value));
+const NumberFromString = coerce(min(integer(), 1), string(), (value) =>
+  Number(value),
+);
 
 // 회사 페이징 + 검색어
 export const SearchByCompany = object({
@@ -47,8 +50,15 @@ const UpdateFieldStruct = object({
 });
 
 export const UpdateField = refine(UpdateFieldStruct, 'UpdateField', (value) => {
-  const hasKeys = Object.keys(value).length > 0;
-  return hasKeys || '수정할 정보를 최소 하나 이상 입력해야 합니다.';
+  const actualUpdates = Object.values(value).filter((v) => {
+    // undefined가 아니고, 문자열인 경우 공백을 제거했을 때 길이가 0보다 커야 함
+    if (v === undefined) return false;
+    if (typeof v === 'string') return v.trim().length > 0;
+    return true; // 문자열이 아닌 다른 타입이 있다면 기본적으로 true
+  });
+  return (
+    actualUpdates.length > 0 || '수정할 정보를 최소 하나 이상 입력해야 합니다.'
+  );
 });
 
 export type UpdateFieldType = Infer<typeof UpdateField>;
