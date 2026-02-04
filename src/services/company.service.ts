@@ -3,6 +3,7 @@ import {
   AdminUserListResponseDto,
   CompanyListResponseDto,
   CompanyResponseDto,
+  UpdateCompanyDto,
 } from '../models/company.model';
 import {
   createCompanyRepo,
@@ -69,6 +70,7 @@ export const getCompanyUsersService = async (params: SearchByUsersType) => {
   return new AdminUserListResponseDto(users, totalCount, page, pageSize);
 };
 
+//회사 수정
 export const updateCompanyService = async (
   params: UpdateFieldType,
   companyId: number,
@@ -83,7 +85,7 @@ export const updateCompanyService = async (
     companyCode,
   );
 
-  return updateCompany;
+  return new UpdateCompanyDto(updateCompany);
 };
 
 export const deleteCompanyService = async (companyId: number) => {

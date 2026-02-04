@@ -90,3 +90,19 @@ export class AdminUserListResponseDto {
     this.data = users.map((user) => new AdminUserListItemDto(user));
   }
 }
+
+// 회사 수정 데이터
+export class UpdateCompanyDto {
+  id: number;
+  companyName: string;
+  companyCode: string;
+  userCount: number;
+
+  constructor(prismaData: any) {
+    this.id = prismaData.id;
+    this.companyName = prismaData.companyName;
+    this.companyCode = prismaData.companyCode;
+    // 조회시 유저수 카운팅 부분 변경
+    this.userCount = prismaData._count?.users ?? 0;
+  }
+}

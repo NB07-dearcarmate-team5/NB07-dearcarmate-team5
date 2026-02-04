@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { create } from 'superstruct';
 import {
+  CompanyIdParams,
   newCompany,
   SearchByCompany,
   SearchByUsers,
@@ -53,9 +54,9 @@ export const updateCompany = async (req: Request, res: Response) => {
 
 // 회사 삭제
 export const deleteCompany = async (req: Request, res: Response) => {
-  const companyId = Number(req.params.companyId);
+  const { companyId } = create(req.params, CompanyIdParams);
 
   await deleteCompanyService(companyId);
 
-  res.status(204).end();
+  res.status(200).json({ message: '회사 삭제 성공' });
 };
