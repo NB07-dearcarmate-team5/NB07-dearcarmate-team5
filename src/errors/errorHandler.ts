@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { StructError } from 'superstruct';
 import { CustomError } from './customError';
 
 export const errorHandler = (
@@ -11,6 +12,15 @@ export const errorHandler = (
     return res.status(err.statusCode).json({
       success: false,
       message: err.message,
+    });
+  }
+
+  if (err instanceof StructError) {
+    const field = err.path.join('.');
+    return res.status(400).json({
+      success: false,
+      message: `데이터 형식이 올바르지 않습니다. 필드: [${field}]`,
+      errorDetail: err.message,
     });
   }
 
