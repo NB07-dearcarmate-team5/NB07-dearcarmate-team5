@@ -78,7 +78,7 @@ export class CarService {
     );
 
     if (exists) {
-      throw new NotFoundError('이미 존재하는 차량번호입니다.');
+      throw new BadRequestError('잘못된 요청입니다');
     }
 
     return this.carRepository.update({
