@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { prismaClient as prisma } from '../prisma/prismaClient';
+import { prisma as prisma } from '../prisma/prisma';
 
 export class UserRepository {
   async findById(userId: number) {
