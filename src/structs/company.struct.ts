@@ -63,6 +63,7 @@ export const UpdateField = refine(UpdateFieldStruct, 'UpdateField', (value) => {
 
 export type UpdateFieldType = Infer<typeof UpdateField>;
 
-export const CompanyIdParams = object({
-  companyId: coerce(integer(), string(), (value) => Number(value)),
+export const UserAndCompanyParams = object({
+  companyId: coerce(min(integer(), 1), string(), (value) => Number(value)),
+  userId: coerce(min(integer(), 1), string(), (value) => Number(value)),
 });

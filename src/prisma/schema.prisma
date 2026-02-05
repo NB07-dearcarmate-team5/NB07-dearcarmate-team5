@@ -131,7 +131,7 @@ model Meeting {
   contractId Int
   contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   date       DateTime // 미팅 실제 일시 (예: 2/22 12:00)
-  alrams     Alarm[]  // 한 미팅에 여러 알람 가능
+  alarms     Alarm[]  // 한 미팅에 여러 알람 가능
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
