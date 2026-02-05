@@ -1,8 +1,12 @@
-import { object, string, number, enums, size, partial, Infer, pattern, Struct, assert, StructError, defaulted } from 'superstruct';
+import { object, string, number, enums, size, partial, Infer, Struct, defaulted, coerce, integer, min, create } from 'superstruct';
 import { Request, Response, NextFunction } from 'express';
 
 
-const integerString = pattern(string(), /^[0-9]+$/);
+const CoercedInteger = coerce(
+  min(integer(), 1),            
+  string(),                    
+  (value) => parseInt(value, 10)
+);
 
 const Manufacturer = enums(['기아', '쉐보레', '현대', '제네시스', '삼성', '쌍용', '기타']);
 const CarType = enums(['세단', '경차', 'SUV']);
@@ -37,35 +41,27 @@ export const UpdateCarBody = partial(object({
 }));
 
 export const CarListQuery = partial(object({
-  page: defaulted(integerString, '1'),
-  pageSize: defaulted(integerString, '10'),
+  page: defaulted(CoercedInteger, 1),
+  pageSize: defaulted(CoercedInteger, 10),
   status: CarStatus,
   searchBy: enums(['carNumber', 'model']),
   keyword: string(),
 }));
 
 export const CarIdParams = object({
-  carId: integerString,
+  carId: CoercedInteger,
 });
 
-export const validateRequest = (
+export const validateRequest = <T, S>(
   location: 'body' | 'params' | 'query',
-  struct: Struct<any, any>
+  struct: Struct<T, S>
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      assert(req[location], struct);
-      next();
-    } catch (error: any) {
-      if (error instanceof StructError) {
-        const field = error.path.join('.') || '전체';
-        return res.status(400).json({
-          message: `데이터 형식이 올바르지 않습니다. 필드: [${field}]`,
-          errorDetail: error.message
-        });
-      }
-      next(error);
-    }
+    const validatedData = create(req[location], struct);
+
+    req[location] = validatedData as any;
+    
+    next();
   };
 };
 

@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { CarService } from '../services/car.service';
-import { CustomError } from '../errors/customError';
 import type { 
   CreateCarBodyType, 
   UpdateCarBodyType, 
-  CarListQueryType 
+  CarListQueryType,
+  CarIdParamsType
 } from '../structs/car.struct';
 
 
@@ -22,11 +22,7 @@ export class CarController {
 
   getCars = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const query = req.query as unknown as CarListQueryType;
-      const result = await this.carService.getCars(req.user!.companyId, {
-        ...query,
-        page: String(query.page || '1'),
-        pageSize: String(query.pageSize || '10'),
-      });
+      const result = await this.carService.getCars(req.user!.companyId, query);
       res.status(200).json(result);
   };
 
@@ -36,32 +32,32 @@ export class CarController {
   };
 
   getCarById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { carId } = req.params; 
+      const { carId } = req.params as unknown as CarIdParamsType;
       const car = await this.carService.getCarById(
         req.user!.companyId, 
-        Number(carId)
+        carId
       );
       res.status(200).json(car);
   };
 
   updateCar = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { carId } = req.params;
+      const { carId } = req.params as unknown as CarIdParamsType;
+      const body = req.body as UpdateCarBodyType;
       const companyId = req.user!.companyId;
-
       const result = await this.carService.updateCar({
-        ...req.body,
-        carId: Number(carId),
-        companyId: companyId
+        ...body,
+        carId,
+        companyId
       });
       res.status(200).json(result);
   };
 
   deleteCar = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-      const { carId } = req.params;
+      const { carId } = req.params as unknown as CarIdParamsType;
       await this.carService.deleteCar(
         req.user!.companyId, 
-        Number(carId)
+        carId
       );
       res.status(200).json({ "message": "차량 삭제 성공" });
-}
+  };
 }
