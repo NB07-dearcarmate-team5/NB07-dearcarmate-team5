@@ -41,27 +41,34 @@ export class CarService {
   }
 
   async getCarById(companyId: number, carId: number): Promise<Car> {
-    const car = await this.carRepository.findById(companyId, carId);
-    
-    if (!car) {
-      throw new NotFoundError('차량을 찾을 수 없습니다.');
-    }
-
-    return car;
+  if (!carId || isNaN(carId)) {
+    throw new CustomError('잘못된 요청입니다', 400);
   }
+
+  const car = await this.carRepository.findById(companyId, carId);
+  
+  if (!car) {
+    throw new NotFoundError('존재하지 않는 차량입니다'); 
+  }
+
+  return car;
+}
 
   async updateCar(input: UpdateCarInput & { carId: number; companyId: number }): Promise<Car> {
-
-  const existing = await this.carRepository.findById(input.companyId, input.carId);
-  if (!existing) {
-    throw new NotFoundError('수정할 차량을 찾을 수 없거나 권한이 없습니다.');
-  }
-
   const targetCarId = Number(input.carId);
   const companyId = Number(input.companyId);
 
-  const carNumberToCheck = input.carNumber || existing.carNumber;
+  if (!targetCarId || isNaN(targetCarId)) {
+    throw new CustomError('잘못된 요청입니다', 400);
+  }
 
+  const existing = await this.carRepository.findById(companyId, targetCarId);
+  
+  if (!existing) {
+    throw new CustomError('존재하지 않는 차량입니다', 404);
+  }
+
+  const carNumberToCheck = input.carNumber || existing.carNumber;
   const exists = await this.carRepository.existsByCompanyIdAndCarNumber(
     companyId,
     carNumberToCheck,
@@ -69,7 +76,7 @@ export class CarService {
   );
 
   if (exists) {
-    throw new CustomError('이미 존재하는 차량번호입니다.', 409);
+    throw new CustomError('이미 존재하는 차량번호입니다.', 400);
   }
 
   return this.carRepository.update({
@@ -81,14 +88,16 @@ export class CarService {
 
 
   async deleteCar(companyId: number, carId: number): Promise<{ message: string }> {
-    const existing = await this.carRepository.findById(companyId, carId);
-    
-    if (!existing) {
-      throw new NotFoundError('차량을 찾을 수 없습니다.');
-    }
-
-    await this.carRepository.delete(companyId, carId);
-
-    return { message: '차량 삭제 성공' };
+  if (!carId || isNaN(carId)) {
+    throw new CustomError('잘못된 요청입니다', 400);
   }
+  const existing = await this.carRepository.findById(companyId, carId);
+  
+  if (!existing) {
+    throw new CustomError('존재하지 않는 차량입니다', 404);
+  }
+
+  await this.carRepository.delete(companyId, carId);
+  return { message: '차량 삭제 성공' };
+}
 }
