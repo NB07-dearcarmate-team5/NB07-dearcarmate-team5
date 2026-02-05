@@ -11,7 +11,7 @@ export const authenticateToken = (
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    throw new UnauthorizedError('인증 토큰이 필요합니다.');
+    throw new UnauthorizedError('로그인이 필요합니다.');
   }
 
   const decoded = verifyAccessToken(token);
