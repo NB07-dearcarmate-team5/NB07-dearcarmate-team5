@@ -1,4 +1,4 @@
-import { object, string, optional, pattern, refine, Infer } from 'superstruct';
+import { object, string, optional, pattern, refine, size, Infer } from 'superstruct';
 
 export const Email = pattern(string(),/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
 export const Phone = pattern(string(), /^\d{2,3}-\d{3,4}-\d{4}$/);
@@ -6,17 +6,17 @@ export const Password = pattern(string(), /^(?=.*[a-zA-Z])(?=.*\d).{8,16}$/);
 
 export const SignUpStruct = refine(
   object({
-    name: string(),
+    name: size(string(), 1, 100),
     email: Email,
-    employeeNumber: string(),
+    employeeNumber: size(string(), 1, 100),
     phoneNumber: Phone,
     password: Password,
-    passwordConfirm: string(),
-    companyName: string(),
-    companyCode: string(),
+    passwordConfirm: size(string(), 1, 100),
+    companyName: size(string(), 1, 100),
+    companyCode: size(string(), 1, 100),
   }),
   'SignUpStruct',
-  (data) => data.password === data.passwordConfirm || '비밀번호가 일치하지 않습니다.'
+  (data) => data.password === data.passwordConfirm || '비밀번호와 비밀번호 확인이 일치하지 않습니다'
 );
 
 export const LoginStruct = object({
@@ -26,11 +26,11 @@ export const LoginStruct = object({
 
 export const UpdateUserStruct = refine(
   object({
-    imageUrl: optional(string()),
-    employeeNumber: optional(string()),
+    imageUrl: optional(size(string(), 1, 1000)),
+    employeeNumber: optional(size(string(), 1, 100)),
     phoneNumber: optional(Phone),
     password: optional(Password),
-    passwordConfirm: optional(string()),
+    passwordConfirm: optional(size(string(), 1, 100)),
     currentPassword: string(),
   }),
   'UpdateUserStruct',

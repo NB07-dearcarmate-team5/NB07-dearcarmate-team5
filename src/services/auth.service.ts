@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { AuthRepository } from '../repositories/auth.repository';
-import { BadRequestError, UnauthorizedError, ConflictError, NotFoundError } from '../errors/errors';
+import { BadRequestError, ConflictError, NotFoundError } from '../errors/errors';
 import { 
   generateAccessToken, 
   generateRefreshToken, 
@@ -48,12 +48,12 @@ export class AuthService {
   async login(email: string, password: string) {
     const user = await this.authRepository.findByEmail(email);
     if (!user) {
-      throw new NotFoundError('존재하지 않거나 비밀번호가 일치하지 않습니다');
+      throw new NotFoundError('존재하지 않거나 비밀번호가 일치하지 않습니다.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new NotFoundError('존재하지 않거나 비밀번호가 일치하지 않습니다.');
     }
 
     const accessToken = generateAccessToken({ 
@@ -73,12 +73,12 @@ export class AuthService {
   async refreshTokens(token: string) {
     const payload = verifyRefreshToken(token);
     if (!payload) {
-      throw new UnauthorizedError('만료되었거나 유효하지 않은 리프레시 토큰입니다.');
+      throw new BadRequestError('잘못된 요청입니다.');
     }
 
     const user = await this.authRepository.findById(payload.userId); 
     if (!user || user.refreshToken !== token) {
-      throw new UnauthorizedError('인증 정보가 일치하지 않습니다.');
+      throw new BadRequestError('잘못된 요청입니다.');
     }
 
     const accessToken = generateAccessToken({ 
