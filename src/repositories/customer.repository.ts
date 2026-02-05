@@ -1,6 +1,5 @@
 import prisma from '../prisma/prisma';
-import { CustomerDto } from '../models/customer.model';
-import { CustomerData } from '../types/customer';
+import { CreateCustomerRequest, CustomerData } from '../types/customer';
 import { UpdateCustomer } from '../structs/customer.struct';
 import { Prisma } from '@prisma/client';
 
@@ -14,7 +13,7 @@ const mapToCustomerData = (customer: CustomerWithCount): CustomerData => {
   return {
     ...rest,
     contractCount: _count?.contracts ?? 0,
-  };
+  }as CustomerData;
 };
 
 // 같은 회사 내에서 전화번호로 고객 조회
@@ -33,18 +32,18 @@ export async function findCustomerByPhone(
 }
 
 // 새로운 고객 정보 저장
-export async function saveCustomer(dto: CustomerDto) {
+export async function saveCustomer(data: CreateCustomerRequest) {
   return await prisma.customer.create({
     data:  {
-      name: dto.name,
-      gender: dto.gender,
-      phoneNumber: dto.phoneNumber,
-      ageGroup: dto.ageGroup,
-      region: dto.region,
-      email: dto.email,
-      memo: dto.memo,
-      userId: dto.userId,
-      companyId: dto.companyId,
+      name: data.name,
+      gender: data.gender,
+      phoneNumber: data.phoneNumber,
+      ageGroup: data.ageGroup,
+      region: data.region,
+      email: data.email,
+      memo: data.memo,
+      userId: data.userId,
+      companyId: data.companyId,
     },
   });
 };
@@ -112,14 +111,14 @@ export async function findCustomerById(customerId: number, companyId: number) {
 }
 
 
-export async function updateCustomer(customerId: number, data: UpdateCustomer) {
+export async function updateCustomer(customerId: number, companyId: number, data: UpdateCustomer){
 
   const updateData = Object.fromEntries(
     Object.entries(data).filter(([_, v]) => v !== undefined)
   ) as Prisma.CustomerUpdateInput;
 
   const updated = await prisma.customer.update({
-    where: { id : customerId },
+    where: { id : customerId, companyId: companyId },
     data: updateData,
     include: {
       _count: {
@@ -131,8 +130,8 @@ export async function updateCustomer(customerId: number, data: UpdateCustomer) {
  return mapToCustomerData(updated);
 }
 
-export async function deleteCustomer(customerId: number) {
+export async function deleteCustomer(customerId: number, companyId: number) {
   await prisma.customer.delete({
-    where: { id: customerId },
+    where: { id: customerId , companyId: companyId},
   });
 }

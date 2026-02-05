@@ -34,7 +34,7 @@ export const CreateCustomerStruct = object({
   // 선택적 필드, undefined이면 null 할당
   ageGroup: defaulted(nullable(enums(AGE_GROUPS)), null),
   region: defaulted(nullable(enums(REGIONS)), null),
-  email: defaulted(nullable(string()), null),
+  email: nonempty(string()),
   memo: defaulted(nullable(string()), null),
 });
 
@@ -45,7 +45,7 @@ export const UpdateCustomerStruct = object({
   phoneNumber: optional(pattern(size(string(), 10, 15), /^[0-9-]+$/)),
   ageGroup: optional(nullable(enums(AGE_GROUPS))),
   region: optional(nullable(enums(REGIONS))),
-  email: optional(nullable(string())),
+  email: optional(nonempty(string())),
   memo: optional(nullable(string())),
 });
 

@@ -14,63 +14,64 @@ datasource db {
 
 //사원정보
 model User {
-  id                Int      @id @default(autoincrement())
-  email             String   @unique
-  password          String
-  name              String
-  imageUrl          String?
-  employeeNumber    String   @unique
-  phoneNumber       String   // 연락처 (010 누락 방지를 위해 String)
-  isAdmin           Boolean  @default(false) // 어드민 확인용, 기본값 false
-  refreshToken      String?
+  id             Int     @id @default(autoincrement())
+  email          String  @unique
+  password       String
+  name           String
+  imageUrl       String?
+  employeeNumber String  @unique
+  phoneNumber    String // 연락처 (010 누락 방지를 위해 String)
+  isAdmin        Boolean @default(false) // 어드민 확인용, 기본값 false
+  refreshToken   String?
 
-  companyId         Int    
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customers         Customer[]
-  contracts         Contract[]
+  companyId Int
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customers Customer[]
+  contracts Contract[]
 
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 //회사정보
 model Company {
-  id           Int  @id @default(autoincrement())
-  companyName  String
-  companyCode  String @unique //회사 코드
-  users        User[]
-  cars         Car[]
-  customers    Customer[]
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  id          Int        @id @default(autoincrement())
+  companyName String
+  companyCode String     @unique //회사 코드
+  users       User[]
+  cars        Car[]
+  customers   Customer[]
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
 }
 
 //Car status
 enum CarStatus {
-  POSSESSION          // 보유 중
+  POSSESSION // 보유 중
   CONTRACT_PROCEEDING // 계약 진행 중
-  CONTRACT_COMPLETED  // 계약 완료
+  CONTRACT_COMPLETED // 계약 완료
 }
+
 //차량정보
 model Car {
-  id                  Int      @id @default(autoincrement())
-  carNumber           String   @unique // 차량 번호
-  manufacturer        String   // 제조사
-  model               String   // 차종/모델명
-  type                String   // 세단, 경차, SUV 등
-  manufacturingYear   Int      // 제조연도
-  mileage             Int      // 주행거리
-  price               BigInt   // 가격(원)
-  accidentCount       Int      @default(0) // 사고횟수
-  status              CarStatus   @default(POSSESSION)
-  explanation         String?  @db.Text // 차량 설명
-  accidentDetails     String?  @db.Text // 사고상세내역
+  id                Int        @id @default(autoincrement())
+  carNumber         String     @unique // 차량 번호
+  manufacturer      String // 제조사
+  model             String // 차종/모델명
+  type              String // 세단, 경차, SUV 등
+  manufacturingYear Int // 제조연도
+  mileage           Int // 주행거리
+  price             BigInt // 가격(원)
+  accidentCount     Int        @default(0) // 사고횟수
+  status            CarStatus  @default(POSSESSION)
+  explanation       String?    @db.Text // 차량 설명
+  accidentDetails   String?    @db.Text // 사고상세내역
   // 관계 설정: 차량은 특정 회사에 귀속됨
-  companyId     Int
-  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contracts     Contract[]
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  companyId         Int
+  company           Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contracts         Contract[]
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
 }
 
 //Customer gender
@@ -78,52 +79,55 @@ enum Gender {
   MALE
   FEMALE
 }
+
 //고객정보
 model Customer {
-  id             Int      @id @default(autoincrement())
-  name           String   // 고객명
-  gender         Gender   // male | female
-  phoneNumber    String   // 연락처 (010 누락 방지를 위해 String)
-  email          String?  //이메일 (선택)
-  ageGroup       String?  // 연령대 (선택)
-  region         String?  // 지역 (선택)
-  memo           String?  @db.Text // 메모
+  id          Int        @id @default(autoincrement())
+  name        String // 고객명
+  gender      Gender // male | female
+  phoneNumber String // 연락처 (010 누락 방지를 위해 String)
+  email       String
+  ageGroup    String? // 연령대 (선택)
+  region      String? // 지역 (선택)
+  memo        String?    @db.Text // 메모
   // 관계 설정: 누가(User), 어느 회사(Company)의 고객인지 관리
-  userId         Int      // 등록한 사원 ID
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId      Int      // 소속 회사 ID
-  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  contracts      Contract[]
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  userId      Int // 등록한 사원 ID
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   Int // 소속 회사 ID
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contracts   Contract[]
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  @@unique([companyId, phoneNumber])
 }
 
 //Contract status
 enum ContractStatus {
-carInspection
-priceNegotiation
-contractDraft
-contractSuccessful
-contractFailed
+  carInspection
+  priceNegotiation
+  contractDraft
+  contractSuccessful
+  contractFailed
 }
 
 //계약정보
 model Contract {
-  id            Int      @id @default(autoincrement())
-  contractPrice   BigInt   // 명세서의 contractPrice (큰 금액 대비 BigInt)
-  resolutionDate  DateTime? // 명세서의 resolutionDate (계약 결정일)
-  status          ContractStatus  @default(carInspection) // 명세서의 status
+  id             Int            @id @default(autoincrement())
+  contractPrice  BigInt // 명세서의 contractPrice (큰 금액 대비 BigInt)
+  resolutionDate DateTime? // 명세서의 resolutionDate (계약 결정일)
+  status         ContractStatus @default(carInspection) // 명세서의 status
 
-// 관계 설정
-  carId           Int      // 선택한 차량
-  car             Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
-  customerId      Int      // 선택한 고객
-  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  userId          Int      // 담당자 (User)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  meetings        Meeting[] // 미팅 일정들 (최대 3개)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  // 관계 설정
+  carId      Int // 선택한 차량
+  car        Car       @relation(fields: [carId], references: [id], onDelete: Cascade)
+  customerId Int // 선택한 고객
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  userId     Int // 담당자 (User)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetings   Meeting[] // 미팅 일정들 (최대 3개)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 }
 
 model Meeting {
@@ -131,9 +135,9 @@ model Meeting {
   contractId Int
   contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   date       DateTime // 미팅 실제 일시 (예: 2/22 12:00)
-  alrams     Alarm[]  // 한 미팅에 여러 알람 가능
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  alrams     Alarm[] // 한 미팅에 여러 알람 가능
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 // 알람 모델 (정확한 알림 시각 저장)
@@ -142,6 +146,6 @@ model Alarm {
   meetingId  Int
   meeting    Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   alarmTime  DateTime // 알림이 울릴 시각 (예: 2/21 09:00)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

@@ -6,6 +6,7 @@ import userRouter from './routes/user.route';
 import companiesRouter from './routes/companies.route';
 import { PORT } from './utils/constants';
 import customersRouter from './routes/customer.route';
+import { generateAccessToken } from './utils/token';
 
 
 const app = express();
@@ -20,6 +21,10 @@ app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/companies', companiesRouter);
 app.use('/customers', customersRouter);
+
+// 테스트용 토큰 생성
+const testToken = generateAccessToken({ userId: 1, companyId: 1, isAdmin: false });
+console.log('🎫 테스트용 토큰:', testToken);
 
 //에러 핸들러 설정 (반드시 라우터보다 아래에 위치!)
 app.use(errorHandler);

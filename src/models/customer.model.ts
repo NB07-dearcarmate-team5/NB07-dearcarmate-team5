@@ -2,13 +2,13 @@ import { Gender } from "@prisma/client";
 import { CleanCustomer, CustomerData } from "../types/customer";
 
 export class CustomerDto {
-    id?: number | undefined;
+    id: number 
     name : string;
     gender: Gender;
     phoneNumber : string;
     ageGroup: string | null ;
     region: string | null ;
-    email: string | null ;
+    email: string ;
     memo: string | null ;
     userId: number;
     companyId: number;
@@ -29,7 +29,8 @@ export class CustomerDto {
     }
     toResponse(): CleanCustomer {
         const { userId, companyId, ...cleanData } = this;
-        return cleanData as CleanCustomer;
+        const response: CleanCustomer = cleanData; 
+        return response;
     }
 }
 

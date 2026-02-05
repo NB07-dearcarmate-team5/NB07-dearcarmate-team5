@@ -1,26 +1,24 @@
 import { Request, Response} from 'express';
 import { create } from 'superstruct';
-import { CustomerDto } from '../models/customer.model';
-import { CustomerData, CustomerList } from "../types/customer";
+import { CreateCustomerRequest, CustomerList } from "../types/customer";
 import { CreateCustomer, CreateCustomerStruct, GetCustomerListParams, GetCustomerListParamsStruct, IdParams, IdParamsStruct, UpdateCustomer, UpdateCustomerStruct } from '../structs/customer.struct';
 import * as customerService from '../services/customer.service';
 
 
 //고객 생성
 export async function createCustomer(req: Request, res: Response) {
-const ValidatedData = create(req.body, CreateCustomerStruct,)as CreateCustomer;
-const {userId, companyId} = req.user!;
+  //id가 없는 생성용 
+  const ValidatedData = create(req.body, CreateCustomerStruct,)as CreateCustomer;
+  const {userId, companyId} = req.user!;
 
-const dto = new CustomerDto({...ValidatedData, userId, companyId}as CustomerData);
+const result = await customerService.createCustomerService({
+    ...ValidatedData,
+    userId,
+    companyId
+  } as CreateCustomerRequest);
 
-const newCustomer = await customerService.createCustomerService(dto); 
-
-//userId, companyId 제외하고 응답
-const { userId: _, companyId: __, ...responseDate } = newCustomer;
-
-res.status(201).json(responseDate);
+  res.status(201).json(result);
 }
-
 //고객 목록 조회
 export async function getCustomersList(req: Request, res: Response) {
     const validatedParams = create(req.query, GetCustomerListParamsStruct) as GetCustomerListParams;
