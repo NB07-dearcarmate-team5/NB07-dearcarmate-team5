@@ -1,10 +1,11 @@
-import { object, string, number, enums, size, partial, Infer, pattern, Struct, assert, StructError } from 'superstruct';
+import { object, string, number, enums, size, partial, Infer, pattern, Struct, assert, StructError, defaulted } from 'superstruct';
 import { Request, Response, NextFunction } from 'express';
 
-const NumberString = pattern(string(), /^[0-9]+$/);
+
+const integerString = pattern(string(), /^[0-9]+$/);
 
 const Manufacturer = enums(['기아', '쉐보레', '현대', '제네시스', '삼성', '쌍용', '기타']);
-const CarType = enums(['세단', '경차', 'SUV', '해치백', '쿠페', '트럭', 'RV']);
+const CarType = enums(['세단', '경차', 'SUV']);
 const CarStatus = enums(['possession', 'contractProceeding', 'contractCompleted']);
 
 export const CreateCarBody = object({
@@ -18,7 +19,7 @@ export const CreateCarBody = object({
   accidentCount: number(),
   explanation: string(),
   accidentDetails: string(),
-  status: CarStatus,
+  status: defaulted(CarStatus, 'possession'),
 });
 
 export const UpdateCarBody = partial(object({
@@ -32,18 +33,19 @@ export const UpdateCarBody = partial(object({
   accidentCount: number(),
   explanation: string(),
   accidentDetails: string(),
+  status: CarStatus,
 }));
 
 export const CarListQuery = partial(object({
-  page: NumberString,
-  pageSize: NumberString,
+  page: defaulted(integerString, '1'),
+  pageSize: defaulted(integerString, '10'),
   status: CarStatus,
   searchBy: enums(['carNumber', 'model']),
   keyword: string(),
 }));
 
 export const CarIdParams = object({
-  carId: NumberString,
+  carId: integerString,
 });
 
 export const validateRequest = (
