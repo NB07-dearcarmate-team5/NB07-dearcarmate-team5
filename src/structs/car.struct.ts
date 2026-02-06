@@ -37,15 +37,14 @@ export const UpdateCarBody = partial(object({
   accidentCount: number(),
   explanation: string(),
   accidentDetails: string(),
-  status: CarStatus,
 }));
 
 export const CarListQuery = object({
   page: defaulted(CoercedInteger, 1),
   pageSize: defaulted(CoercedInteger, 10),
-  status: CarStatus,
-  searchBy: enums(['carNumber', 'model']),
-  keyword: string(),
+  status: defaulted(CarStatus, 'possession'),
+  searchBy: defaulted(enums(['carNumber', 'model']), 'carNumber'),
+  keyword: defaulted(string(), ''),
 });
 
 export const CarIdParams = object({
@@ -58,8 +57,16 @@ export const validateRequest = <T, S>(
 ) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const validatedData = create(req[location], struct);
-
-    req[location] = validatedData as any;
+    if (location === 'body') {
+      req.body = validatedData;
+    } else {
+      const target = req[location] as Record<string, unknown>;
+      const source = validatedData as Record<string, unknown>;
+      
+      Object.keys(source).forEach((key) => {
+        target[key] = source[key];
+      });
+    }
     
     next();
   };
