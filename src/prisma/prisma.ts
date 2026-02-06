@@ -5,9 +5,6 @@ import 'dotenv/config';
 
 const { Pool } = pgPkg;
 
-/**
- * 대용량 업로드를 위한 커넥션 풀 설정
- */
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20, // 동시 연결 최대 개수 (대용량 처리 시 여유 있게 설정)
@@ -18,9 +15,7 @@ const pool = new Pool({
 
 const adapter = new PrismaPg(pool);
 
-/**
- * Prisma 인스턴스 생성
- */
+
 const prisma = new PrismaClient({
   adapter,
   log: [
@@ -29,7 +24,7 @@ const prisma = new PrismaClient({
     { emit: 'stdout', level: 'info' },
     { emit: 'stdout', level: 'warn' },
   ],
-  // 대용량 작업 시 트랜잭션 타임아웃이 나지 않도록 기본값 설정 (필요 시 호출 단에서 조정 가능)
+
 });
 
 export default prisma;

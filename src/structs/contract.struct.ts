@@ -6,15 +6,22 @@ import {
   Infer,
   enums,
   optional,
+  pattern,
 } from 'superstruct';
+
+// 오전 9시
+const Time0900Pattern = /T09:00:00(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
 export const CreateContractStruct = object({
   carId: number(),
   customerId: number(),
   meetings: array(
     object({
-      date: string(), // ISO8601 날짜 문자열
-      alarms: array(string()), // ISO8601 날짜 문자열 배열
+      date: string(), // 미팅 일시는 자유로운 시간 선택 가능
+      alarms: array(
+        // 알람은 meeting 날짜 기준 당일, 작일 오전 9시여야 함(알람은 오전 9시에만 가능)
+        pattern(string(), Time0900Pattern),
+      ),
     }),
   ),
 });
