@@ -1,6 +1,6 @@
 import { Prisma, ContractStatus } from '@prisma/client';
 
-// 리포지토리에서 사용하는 include 구조를 정의합니다.
+// 리포지토리에서 사용하는 include 구조를 정의
 export const contractResponseInclude = {
   user: { select: { id: true, name: true } },
   customer: { select: { id: true, name: true } },
@@ -13,6 +13,7 @@ export type ContractWithRelations = Prisma.ContractGetPayload<{
   include: typeof contractResponseInclude;
 }>;
 
+// 데이터 반환
 export class ContractResponseDto {
   id: number;
   status: ContractStatus;
@@ -30,7 +31,7 @@ export class ContractResponseDto {
     this.id = contract.id;
     this.status = contract.status;
     this.resolutionDate = contract.resolutionDate;
-    this.contractPrice = Number(contract.contractPrice); // BigInt 변환
+    this.contractPrice = Number(contract.contractPrice);
 
     this.meetings = contract.meetings.map((m) => ({
       date: m.date,

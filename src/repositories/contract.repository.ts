@@ -1,9 +1,21 @@
 import { CarStatus, Prisma } from '@prisma/client';
 import prisma from '../prisma/prisma';
-import { CreateContractType } from '../structs/contract.struct';
+import {
+  CreateContractType,
+  UpdateContractDb,
+} from '../structs/contract.struct';
 import { contractResponseInclude } from '../models/contract.model';
 
 export class ContractRepo {
+  // 계약 존재 확인
+  findContract = async (contractId: number) => {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+    });
+    return contract;
+  };
+
+  // 계약 생성
   createContract = async (
     userId: number,
     data: CreateContractType,
@@ -30,7 +42,7 @@ export class ContractRepo {
     });
   };
 
-  // 계약 등록시 차량 상태 없데이트
+  // 계약 등록, 수정, 삭제시 car status 변경
   updateCarStatus = async (
     carId: number,
     status: CarStatus,
@@ -45,7 +57,6 @@ export class ContractRepo {
   // 계약 조회
   getContracts = async (searchBy?: string, keyword?: string) => {
     const where: Prisma.ContractWhereInput = {};
-
     // 검색 조건 처리
     if (searchBy && keyword) {
       if (searchBy === 'customerName') {
@@ -54,7 +65,6 @@ export class ContractRepo {
         where.user = { name: { contains: keyword, mode: 'insensitive' } };
       }
     }
-
     const contracts = await prisma.contract.findMany({
       where,
       include: contractResponseInclude,
@@ -64,13 +74,71 @@ export class ContractRepo {
     return contracts;
   };
 
+  // 계약 수정
+  updateContract = async (
+    tx: Prisma.TransactionClient,
+    contractId: number,
+    data: UpdateContractDb,
+  ) => {
+    const {
+      meetings,
+      contractDocuments,
+      contractPrice,
+      resolutionDate,
+      ...scalarFields
+    } = data;
+
+    // undefined인 키값들을 완전히 제거한 순수 필드 객체 생성
+    const cleanScalarFields = Object.fromEntries(
+      Object.entries(scalarFields).filter(([_, v]) => v !== undefined),
+    );
+
+    return await tx.contract.update({
+      where: { id: contractId },
+      data: {
+        ...cleanScalarFields, // undefined가 제거된 필드들만 주입
+        // 값이 있을 때만 객체 생성
+        ...(contractPrice !== undefined && { contractPrice }),
+        ...(resolutionDate && { resolutionDate: new Date(resolutionDate) }),
+        //미팅 및 알람 업데이트
+        ...(meetings && {
+          meetings: {
+            deleteMany: {},
+            create: meetings.map((m) => ({
+              date: new Date(m.date),
+              alarms: {
+                create: m.alarms.map((alarmTime) => ({
+                  alarmTime: new Date(alarmTime),
+                })),
+              },
+            })),
+          },
+        }),
+        //계약서류 업데이트
+        ...(contractDocuments && {
+          contractDocument: {
+            set: [],
+            connect: contractDocuments.map((doc) => ({ id: doc.id })),
+          },
+        }),
+      } as Prisma.ContractUpdateInput, // 타입을 명시적으로 지정하여 추론 에러 방지
+      include: contractResponseInclude,
+    });
+  };
+
+  // 계약 삭제
+  deleteContract = async (tx: Prisma.TransactionClient, contractId: number) => {
+    await tx.contract.delete({
+      where: { id: contractId },
+    });
+  };
+
   // 회사가 보유중인 차량(계약되지 않은 차량)
   getCars = async (companyId: number) => {
     const cars = await prisma.car.findMany({
       where: { companyId, status: 'POSSESSION' },
       select: { id: true, model: true, carNumber: true },
     });
-
     return cars;
   };
 
@@ -80,7 +148,6 @@ export class ContractRepo {
       where: { companyId },
       select: { id: true, name: true, email: true },
     });
-
     return customers;
   };
 
@@ -90,7 +157,6 @@ export class ContractRepo {
       where: { companyId },
       select: { id: true, name: true, email: true },
     });
-
     return users;
   };
 

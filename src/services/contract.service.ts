@@ -5,10 +5,22 @@ import {
 } from '../models/contract.model';
 import prisma from '../prisma/prisma';
 import { ContractRepo } from '../repositories/contract.repository';
-import { CreateContractType, SearchOption } from '../structs/contract.struct';
+import {
+  CreateContractType,
+  SearchOption,
+  UpdateContract,
+} from '../structs/contract.struct';
 
 export class ContractService {
   private contractRepo = new ContractRepo();
+
+  // 계약 존재 확인
+  validateContract = async (contractId: number) => {
+    const contract = await this.contractRepo.findContract(contractId);
+    if (!contract) throw new NotFoundError('계약을 찾을 수 없습니다.');
+
+    return contract;
+  };
 
   // 계약 등록
   createContract = async (userId: number, data: CreateContractType) => {
@@ -44,6 +56,43 @@ export class ContractService {
     const response = new ContractListResponseDto(contracts);
 
     return response.results;
+  };
+
+  // 계약 수정
+  updateContract = async (contractId: number, params: UpdateContract) => {
+    const contract = await this.validateContract(contractId);
+    const carId = contract.carId;
+
+    if (Object.keys(params).length === 0) {
+      throw new BadRequestError('수정할 데이터가 최소 한개이상 있어야 합니다.');
+    }
+    // 데이터 구조 분해 할당 + price 빅인트 변환
+    const updateData = {
+      ...params,
+      contractPrice: params.contractPrice
+        ? BigInt(params.contractPrice)
+        : undefined,
+    };
+
+    const update = await prisma.$transaction(async (tx) => {
+      await this.contractRepo.updateCarStatus(carId, 'CONTRACT_PROCEEDING', tx);
+      return await this.contractRepo.updateContract(tx, contractId, updateData);
+    });
+
+    return new ContractResponseDto(update);
+  };
+
+  // 계약 삭제
+  deleteContract = async (contractId: number) => {
+    const contract = await this.validateContract(contractId);
+    const carId = contract.carId;
+
+    await prisma.$transaction(async (tx) => {
+      await this.contractRepo.deleteContract(tx, contractId);
+      await this.contractRepo.updateCarStatus(carId, 'POSSESSION', tx);
+    });
+
+    return { message: '계약 삭제 완료' };
   };
 
   // 회사 소유의 차량 조회(계약 등록, 수정시 사용)

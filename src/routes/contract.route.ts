@@ -10,8 +10,10 @@ contractRouter.use(authenticateToken);
 
 contractRouter.post('/', contractController.createContract);
 contractRouter.get('/', contractController.getContracts);
-contractRouter.get('/car', contractController.getCars);
+contractRouter.get('/cars', contractController.getCars);
 contractRouter.get('/customers', contractController.getCustomers);
 contractRouter.get('/users', contractController.getUsers);
+contractRouter.patch('/:contractId', contractController.updateContract);
+contractRouter.delete('/:contractId', contractController.deleteContract);
 
 export default contractRouter;

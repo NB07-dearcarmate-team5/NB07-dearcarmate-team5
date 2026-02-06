@@ -112,6 +112,16 @@ CREATE TABLE "Alarm" (
     CONSTRAINT "Alarm_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "ContractDocument" (
+    "id" SERIAL NOT NULL,
+    "fileName" TEXT NOT NULL,
+    "fileUrl" TEXT NOT NULL,
+    "contractId" INTEGER,
+
+    CONSTRAINT "ContractDocument_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -123,6 +133,9 @@ CREATE UNIQUE INDEX "Company_companyCode_key" ON "Company"("companyCode");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Car_carNumber_key" ON "Car"("carNumber");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Customer_companyId_phoneNumber_key" ON "Customer"("companyId", "phoneNumber");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "Company"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -150,3 +163,6 @@ ALTER TABLE "Meeting" ADD CONSTRAINT "Meeting_contractId_fkey" FOREIGN KEY ("con
 
 -- AddForeignKey
 ALTER TABLE "Alarm" ADD CONSTRAINT "Alarm_meetingId_fkey" FOREIGN KEY ("meetingId") REFERENCES "Meeting"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ContractDocument" ADD CONSTRAINT "ContractDocument_contractId_fkey" FOREIGN KEY ("contractId") REFERENCES "Contract"("id") ON DELETE SET NULL ON UPDATE CASCADE;

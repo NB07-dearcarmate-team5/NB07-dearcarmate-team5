@@ -5,9 +5,11 @@ import { UserAndCompanyParams } from '../structs/company.struct';
 import {
   CreateContractStruct,
   SearchByContracts,
+  UpdateContractData,
+  ContractIdParam,
 } from '../structs/contract.struct';
 
-const getValidatedCompanyId = (req: Request): number => {
+const getValidatedCompanyId = (req: Request) => {
   const { companyId } = create(req.user, UserAndCompanyParams);
   return companyId;
 };
@@ -17,7 +19,7 @@ export class ContractController {
 
   // 계약 생성
   createContract = async (req: Request, res: Response) => {
-    const { userId } = create(req.body, UserAndCompanyParams);
+    const { userId } = create(req.user, UserAndCompanyParams);
     const validated = create(req.body, CreateContractStruct);
 
     const contract = await this.contractService.createContract(
@@ -34,6 +36,26 @@ export class ContractController {
     const contracts = await this.contractService.getContracts(validated);
 
     return res.status(200).json(contracts);
+  };
+
+  //계약 수정
+  updateContract = async (req: Request, res: Response) => {
+    const { contractId } = create(req.params, ContractIdParam);
+    const validated = create(req.body, UpdateContractData);
+    const contract = await this.contractService.updateContract(
+      contractId,
+      validated,
+    );
+
+    return res.status(200).json(contract);
+  };
+
+  //계약 삭제
+  deleteContract = async (req: Request, res: Response) => {
+    const { contractId } = create(req.params, ContractIdParam);
+    const message = await this.contractService.deleteContract(contractId);
+
+    return res.status(200).json(message);
   };
 
   // 회사 소유 차량 조회
