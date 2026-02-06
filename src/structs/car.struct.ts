@@ -40,13 +40,13 @@ export const UpdateCarBody = partial(object({
   status: CarStatus,
 }));
 
-export const CarListQuery = partial(object({
+export const CarListQuery = object({
   page: defaulted(CoercedInteger, 1),
   pageSize: defaulted(CoercedInteger, 10),
   status: CarStatus,
   searchBy: enums(['carNumber', 'model']),
   keyword: string(),
-}));
+});
 
 export const CarIdParams = object({
   carId: CoercedInteger,
