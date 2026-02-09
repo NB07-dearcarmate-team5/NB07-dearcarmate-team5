@@ -1,4 +1,4 @@
-import { CarStatus, ContractStatus } from '@prisma/client';
+import { ContractStatus } from '@prisma/client';
 import { BadRequestError, NotFoundError } from '../errors/errors';
 import {
   ContractListResponseDto,
