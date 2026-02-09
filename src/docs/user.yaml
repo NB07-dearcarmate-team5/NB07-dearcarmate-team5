@@ -1,0 +1,175 @@
+paths:
+  /users:
+    post:
+      tags:
+        - User
+      summary: 회원가입 (사원 등록)
+      description: 회사명과 코드가 일치해야 가입 가능
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        201:
+          description: 회원가입 성공
+        400:
+          description: 잘못된 요청
+        409:
+          description: 이미 존재하는 이메일/사번
+  /users/me:
+    get:
+      tags:
+        - User
+      summary: 내 프로필 조회
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: 조회 성공
+        400:
+          description: 잘못된 요청
+        401:
+          description: 로그인 필요
+        404:
+          description: 존재하지 않는 유저
+    patch:
+      tags:
+        - User
+      summary: 내 정보 수정
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        200:
+          description: 수정 성공
+        400:
+          description: 잘못된 요청
+        401:
+          description: 로그인 필요
+        404:
+          description: 존재하지 않는 유저
+    delete:
+      tags:
+        - User
+      summary: 회원 탈퇴
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: 수정 성공
+        400:
+          description: 잘못된 요청
+        401:
+          description: 로그인 필요
+
+  /users/{userId}:
+    delete:
+      tags:
+        - User
+      summary: 유저 삭제 (관리자 권한)
+      description: 관리자가 유저 ID를 지정하여 삭제
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: 삭제할 유저의 ID
+      responses:
+        200:
+          description: 유저 삭제 성공
+        400:
+          description: 잘못된 요청
+        401:
+          description: 로그인 필요
+        404:
+          description: 존재하지 않는 유저
+
+components:
+  schemas:
+    SignUpRequest:
+      type: object
+      required:
+        - name
+        - email
+        - employeeNumber
+        - phoneNumber
+        - password
+        - passwordConfirm
+        - companyName
+        - companyCode
+      properties:
+        name:
+          type: string
+          description: 이름
+          example: 테스터
+        email:
+          type: string
+          format: email
+          description: 이메일
+          example: tester@happy.com
+        employeeNumber:
+          type: string
+          description: 사원 번호
+          example: 20261001
+        phoneNumber:
+          type: string
+          pattern: '^\d{2,3}-\d{3,4}-\d{4}$'
+          description: 휴대폰 번호 (010-0000-0000)
+          example: 010-1234-5678
+        password:
+          type: string
+          format: password
+          description: 비밀번호 (8~16자, 영문+숫자)
+          example: password1
+        passwordConfirm:
+          type: string
+          format: password
+          description: 비밀번호 확인
+          example: password1
+        companyName:
+          type: string
+          description: 소속 회사명
+          example: testCar
+        companyCode:
+          type: string
+          description: 회사 인증 코드
+          example: CODE123
+    UpdateUserRequest:
+      type: object
+      required:
+        - currentPassword
+      properties:
+        imageUrl:
+          type: string
+          description: 프로필 이미지 URL
+          example: https://example.com/image.jpg
+        employeeNumber:
+          type: string
+          description: 사원 번호 변경 시
+          example: 20261002
+        phoneNumber:
+          type: string
+          description: 연락처 변경 시
+          example: 010-1234-5679
+        password:
+          type: string
+          description: 새 비밀번호
+          example: password2
+        passwordConfirm:
+          type: string
+          description: 새 비밀번호 확인
+          example: password2
+        currentPassword:
+          type: string
+          description: 현재 비밀번호 (본인 확인용)
+          example: password1
