@@ -10,6 +10,8 @@ import companiesRouter from './routes/companies.route';
 import customersRouter from './routes/customer.route';
 import contractRouter from './routes/contract.route';
 import { PORT } from './utils/constants';
+import path from 'path';
+import imageRouter from './routes/image.route';
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use('/companies', companiesRouter);
 app.use('/customers', customersRouter);
 app.use('/contracts', contractRouter);
 app.use('/cars', carRoutes);
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/images', imageRouter);
 
 // 3. 에러 핸들러 (모든 라우터 뒤에 위치)
 app.use(errorHandler);
