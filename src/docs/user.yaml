@@ -90,7 +90,7 @@ paths:
         400:
           description: 잘못된 요청
         401:
-          description: 로그인 필요
+          description: 관리자 권한 필요
         404:
           description: 존재하지 않는 유저
 

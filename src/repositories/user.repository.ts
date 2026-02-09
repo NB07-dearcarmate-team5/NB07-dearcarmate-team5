@@ -9,6 +9,12 @@ export class UserRepository {
     });
   }
 
+  async findByEmployeeNumber(employeeNumber: string) {
+    return await prisma.user.findUnique({
+      where: { employeeNumber },
+    });
+  }
+
   async update(userId: number, updateData: Prisma.UserUpdateInput) {
     return await prisma.user.update({
       where: { id: userId },

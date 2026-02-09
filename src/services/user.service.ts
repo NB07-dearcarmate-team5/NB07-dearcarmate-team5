@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../models/user.model';
-import { NotFoundError, UnauthorizedError } from '../errors/errors';
+import { NotFoundError, UnauthorizedError, ConflictError } from '../errors/errors';
 import { UpdateUserType } from '../structs/user.struct';
 import fs from 'fs';
 import path from 'path';
@@ -54,7 +54,13 @@ private deleteProfileImageFile(imageUrl: string) {
       }
       dataToUpdate.imageUrl = updateData.imageUrl;
     }
-    if (updateData.employeeNumber !== undefined) dataToUpdate.employeeNumber = updateData.employeeNumber;
+    if (updateData.employeeNumber !== undefined && updateData.employeeNumber !== user.employeeNumber) {
+      const existingUser = await this.userRepository.findByEmployeeNumber(updateData.employeeNumber);
+      if (existingUser) {
+        throw new ConflictError('이미 등록된 사원 번호입니다.');
+      }
+      dataToUpdate.employeeNumber = updateData.employeeNumber;
+    }
     if (updateData.phoneNumber !== undefined) dataToUpdate.phoneNumber = updateData.phoneNumber;
     
     if (updateData.password !== undefined) {
@@ -74,6 +80,21 @@ private deleteProfileImageFile(imageUrl: string) {
     }
 
     await this.userRepository.delete(userId);
+    return { message: '유저 삭제 성공' };
+  }
+
+  async deleteUserByAdmin(targetUserId: number) {
+    const targetUser = await this.userRepository.findById(targetUserId);
+
+    if (!targetUser) {
+      throw new NotFoundError('존재하지 않는 사용자입니다.');
+    }
+
+    if (targetUser.imageUrl) {
+      this.deleteProfileImageFile(targetUser.imageUrl);
+    }
+
+    await this.userRepository.delete(targetUserId);
     return { message: '유저 삭제 성공' };
   }
 }
