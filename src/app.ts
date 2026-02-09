@@ -1,18 +1,40 @@
-//express 5 버전부터는 try/catch를 사용하지 않아도 알아서 에러를 넘겨줌
+import 'dotenv/config';
 import express from 'express';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import { errorHandler } from './errors/errorHandler';
-import contractDocumentRoute from './routes/contractDocument.route';
+import carRoutes from './routes/car.route';
+import authRouter from './routes/auth.route';
+import userRouter from './routes/user.route';
+import companiesRouter from './routes/companies.route';
+import customersRouter from './routes/customer.route';
+import { PORT } from './utils/constants';
+import path from 'path';
+import imageRouter from './routes/image.route';
 
 const app = express();
 
-// 1. 미들웨어 설정
-app.use(express.json()); // JSON 요청 바디 파싱
-app.use(express.urlencoded({ extended: true })); // URL-encoded 파싱
+// 1. 공통 미들웨어 설정
+app.use(morgan('dev')); 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); 
 
-// 라우터 설정 (계획서의 routes 폴더 활용)
-app.use('/contractDocuments', contractDocumentRoute);
+// 2. 라우터 등록
+app.use('/auth', authRouter);
+app.use('/users', userRouter);
+app.use('/companies', companiesRouter);
+app.use('/customers', customersRouter);
+app.use('/cars', carRoutes);
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/images', imageRouter);
 
-//에러 핸들러 설정 (반드시 라우터보다 아래에 위치!)
+// 3. 에러 핸들러 (모든 라우터 뒤에 위치)
 app.use(errorHandler);
+
+// 4. 서버 실행
+app.listen(PORT, () => {
+  console.log(`🚀 서버가 http://localhost:${PORT} 에서 실행 중입니다!`);
+});
 
 export default app;
