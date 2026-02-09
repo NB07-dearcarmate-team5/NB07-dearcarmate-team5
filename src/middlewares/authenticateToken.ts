@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/token';
-import { UnauthorizedError, ForbiddenError } from '../errors/errors';
+import { UnauthorizedError, BadRequestError } from '../errors/errors';
 
 export const authenticateToken = (
   req: Request,
@@ -17,7 +17,7 @@ export const authenticateToken = (
   const decoded = verifyAccessToken(token);
 
   if (!decoded) {
-    throw new ForbiddenError('만료되었거나 유효하지 않은 토큰입니다.');
+    throw new BadRequestError('잘못된 요청입니다.');
   }
 
   req.user = {

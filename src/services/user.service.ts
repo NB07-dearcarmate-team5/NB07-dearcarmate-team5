@@ -2,8 +2,10 @@ import bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { UserRepository } from '../repositories/user.repository';
 import { User } from '../models/user.model';
-import { NotFoundError, UnauthorizedError } from '../errors/errors';
+import { NotFoundError, UnauthorizedError, ConflictError } from '../errors/errors';
 import { UpdateUserType } from '../structs/user.struct';
+import fs from 'fs';
+import path from 'path';
 
 export class UserService {
   private userRepository = new UserRepository();
@@ -15,6 +17,20 @@ export class UserService {
 
   return user;
 }
+private deleteProfileImageFile(imageUrl: string) {
+    try {
+      const filename = imageUrl.split('/uploads/').pop();
+      
+      if (filename) {
+        const filePath = path.join(process.cwd(), 'uploads', filename);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    } catch (error) {
+      console.error('기존 프로필 이미지 삭제 실패:', error);
+    }
+  }
 
   async getUserProfile(userId: number) {
     const user = await this.isUser(userId);
@@ -32,8 +48,19 @@ export class UserService {
 
     const dataToUpdate: Prisma.UserUpdateInput = {};
 
-    if (updateData.imageUrl !== undefined) dataToUpdate.imageUrl = updateData.imageUrl;
-    if (updateData.employeeNumber !== undefined) dataToUpdate.employeeNumber = updateData.employeeNumber;
+    if (updateData.imageUrl !== undefined) {
+      if (user.imageUrl && user.imageUrl !== updateData.imageUrl) {
+        this.deleteProfileImageFile(user.imageUrl);
+      }
+      dataToUpdate.imageUrl = updateData.imageUrl;
+    }
+    if (updateData.employeeNumber !== undefined && updateData.employeeNumber !== user.employeeNumber) {
+      const existingUser = await this.userRepository.findByEmployeeNumber(updateData.employeeNumber);
+      if (existingUser) {
+        throw new ConflictError('이미 등록된 사원 번호입니다.');
+      }
+      dataToUpdate.employeeNumber = updateData.employeeNumber;
+    }
     if (updateData.phoneNumber !== undefined) dataToUpdate.phoneNumber = updateData.phoneNumber;
     
     if (updateData.password !== undefined) {
@@ -46,9 +73,29 @@ export class UserService {
   }
 
   async deleteUser(userId: number) {
-    await this.isUser(userId);
+    const user = await this.isUser(userId);
+
+    if (user.imageUrl) {
+      this.deleteProfileImageFile(user.imageUrl);
+    }
 
     await this.userRepository.delete(userId);
     return { message: '유저 삭제 성공' };
   }
+
+  async deleteUserByAdmin(targetUserId: number) {
+    const targetUser = await this.userRepository.findById(targetUserId);
+
+    if (!targetUser) {
+      throw new NotFoundError('존재하지 않는 사용자입니다.');
+    }
+
+    if (targetUser.imageUrl) {
+      this.deleteProfileImageFile(targetUser.imageUrl);
+    }
+
+    await this.userRepository.delete(targetUserId);
+    return { message: '유저 삭제 성공' };
+  }
 }
+
