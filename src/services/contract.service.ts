@@ -1,3 +1,4 @@
+import { CarStatus, ContractStatus } from '@prisma/client';
 import { BadRequestError, NotFoundError } from '../errors/errors';
 import {
   ContractListResponseDto,
@@ -20,6 +21,20 @@ export class ContractService {
     if (!contract) throw new NotFoundError('계약을 찾을 수 없습니다.');
 
     return contract;
+  };
+
+  // 계약 상태 변화를 확인하여 차량 상태 변경
+  determineCarStatus = (contractStatus: ContractStatus) => {
+    switch (contractStatus) {
+      case 'contractSuccessful':
+        return 'CONTRACT_COMPLETED';
+
+      case 'contractFailed':
+        return 'POSSESSION';
+
+      default:
+        return 'CONTRACT_PROCEEDING';
+    }
   };
 
   // 계약 등록
@@ -75,8 +90,16 @@ export class ContractService {
     };
 
     const update = await prisma.$transaction(async (tx) => {
-      await this.contractRepo.updateCarStatus(carId, 'CONTRACT_PROCEEDING', tx);
-      return await this.contractRepo.updateContract(tx, contractId, updateData);
+      const updateContract = await this.contractRepo.updateContract(
+        tx,
+        contractId,
+        updateData,
+      );
+      // car status 변경을 위해 업데이트된 계약의 status 확인
+      const targetCarStatus = this.determineCarStatus(updateContract.status);
+      // 변경된 계약 상태를 반영하여 차량 상태 업데이트
+      await this.contractRepo.updateCarStatus(carId, targetCarStatus, tx);
+      return updateContract;
     });
 
     return new ContractResponseDto(update);

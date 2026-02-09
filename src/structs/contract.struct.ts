@@ -7,6 +7,7 @@ import {
   enums,
   optional,
   pattern,
+  coerce,
 } from 'superstruct';
 
 // 오전 9시
@@ -33,7 +34,7 @@ export const SearchByContracts = object({
 
 // contractId 타입 검증
 export const ContractIdParam = object({
-  contractId: number(),
+  contractId: coerce(number(), string(), (value) => Number(value)),
 });
 
 // 계약 수정
