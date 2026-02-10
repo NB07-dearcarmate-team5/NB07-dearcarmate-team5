@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError, UnauthorizedError } from '../errors/errors';
 
-export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+export const isAdmin = (req: Request, _res: Response, next: NextFunction) => {
   if (!req.user) {
     throw new UnauthorizedError('인증 정보가 없습니다.');
   }

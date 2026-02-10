@@ -11,16 +11,17 @@ import authRouter from './routes/auth.route';
 import userRouter from './routes/user.route';
 import companiesRouter from './routes/companies.route';
 import customersRouter from './routes/customer.route';
+import contractRouter from './routes/contract.route';
 import { PORT } from './utils/constants';
 import imageRouter from './routes/image.route';
 
 const app = express();
 
-// 1. 공통 미들웨어 설정
-app.use(morgan('dev')); 
+// 1. 미들웨어 설정
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); 
+app.use(cookieParser());
 
 // 2. 라우터 등록
 
@@ -63,6 +64,7 @@ app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/companies', companiesRouter);
 app.use('/customers', customersRouter);
+app.use('/contracts', contractRouter);
 app.use('/cars', carRoutes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/images', imageRouter);

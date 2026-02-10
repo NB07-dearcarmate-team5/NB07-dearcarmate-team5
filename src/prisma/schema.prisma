@@ -41,6 +41,7 @@ model Company {
   users       User[]
   cars        Car[]
   customers   Customer[]
+  contracts   Contract[]
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
 }
@@ -125,7 +126,10 @@ model Contract {
   customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
   userId     Int // 담당자 (User)
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId  Int // 회사
+  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   meetings   Meeting[] // 미팅 일정들 (최대 3개)
+  contractDocument ContractDocument[]
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
 }
@@ -135,7 +139,7 @@ model Meeting {
   contractId Int
   contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   date       DateTime // 미팅 실제 일시 (예: 2/22 12:00)
-  alrams     Alarm[] // 한 미팅에 여러 알람 가능
+  alarms     Alarm[] // 한 미팅에 여러 알람 가능
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
@@ -148,4 +152,13 @@ model Alarm {
   alarmTime  DateTime // 알림이 울릴 시각 (예: 2/21 09:00)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model ContractDocument {
+  id         Int      @id @default(autoincrement())
+  fileName   String
+  fileUrl    String
+  // 처음 업로드 시에는 null이었다가, 계약 수정 시 값이 채워짐
+  contractId Int?     
+  contract   Contract? @relation(fields: [contractId], references: [id])
 }

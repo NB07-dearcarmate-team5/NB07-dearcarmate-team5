@@ -5,7 +5,7 @@ export class UserRepository {
   async findById(userId: number) {
     return await prisma.user.findUnique({
       where: { id: userId },
-      include: { company: true }, 
+      include: { company: true },
     });
   }
 

@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import  prisma  from '../prisma/prisma';
+import prisma from '../prisma/prisma';
 
 export class AuthRepository {
   async findByEmail(email: string) {
