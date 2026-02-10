@@ -19,11 +19,12 @@ export class ContractController {
 
   // 계약 생성
   createContract = async (req: Request, res: Response) => {
-    const { userId } = create(req.user, UserAndCompanyParams);
+    const { userId, companyId } = create(req.user, UserAndCompanyParams);
     const validated = create(req.body, CreateContractStruct);
 
     const contract = await this.contractService.createContract(
       userId,
+      companyId,
       validated,
     );
 
@@ -32,8 +33,12 @@ export class ContractController {
 
   // 계약 조회
   getContracts = async (req: Request, res: Response) => {
+    const { companyId } = create(req.user, UserAndCompanyParams);
     const validated = create(req.query, SearchByContracts);
-    const contracts = await this.contractService.getContracts(validated);
+    const contracts = await this.contractService.getContracts(
+      validated,
+      companyId,
+    );
 
     return res.status(200).json(contracts);
   };

@@ -41,6 +41,7 @@ model Company {
   users       User[]
   cars        Car[]
   customers   Customer[]
+  contracts   Contract[]
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
 }
@@ -125,6 +126,8 @@ model Contract {
   customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
   userId     Int // 담당자 (User)
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId  Int // 회사
+  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   meetings   Meeting[] // 미팅 일정들 (최대 3개)
   contractDocument ContractDocument[]
   created_at DateTime  @default(now())

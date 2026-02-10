@@ -62,7 +62,7 @@ export const UpdateContractData = object({
     array(
       object({
         date: string(),
-        alarms: array(string()),
+        alarms: array(pattern(string(), Time0900Pattern)),
       }),
     ),
   ),

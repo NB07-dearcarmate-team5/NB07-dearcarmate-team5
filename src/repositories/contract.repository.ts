@@ -18,6 +18,7 @@ export class ContractRepo {
   // 계약 생성
   createContract = async (
     userId: number,
+    companyId: number,
     data: CreateContractType,
     price: bigint,
     tx: Prisma.TransactionClient,
@@ -25,6 +26,9 @@ export class ContractRepo {
     return await tx.contract.create({
       data: {
         contractPrice: price,
+        company: {
+          connect: { id: companyId }, // 컨트롤러에서 받아온 companyId 사용
+        },
         user: { connect: { id: userId } },
         car: { connect: { id: data.carId } },
         customer: { connect: { id: data.customerId } },
@@ -55,8 +59,14 @@ export class ContractRepo {
   };
 
   // 계약 조회
-  getContracts = async (searchBy?: string, keyword?: string) => {
-    const where: Prisma.ContractWhereInput = {};
+  getContracts = async (
+    companyId: number,
+    searchBy?: string,
+    keyword?: string,
+  ) => {
+    const where: Prisma.ContractWhereInput = {
+      companyId: companyId,
+    };
     // 검색 조건 처리
     if (searchBy && keyword) {
       if (searchBy === 'customerName') {

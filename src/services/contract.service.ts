@@ -38,7 +38,11 @@ export class ContractService {
   };
 
   // 계약 등록
-  createContract = async (userId: number, data: CreateContractType) => {
+  createContract = async (
+    userId: number,
+    companyId: number,
+    data: CreateContractType,
+  ) => {
     const car = await this.contractRepo.targetCar(data.carId);
     if (!car) throw new NotFoundError('해당 차량을 찾을 수 없습니다.');
     if (car.status !== 'POSSESSION') {
@@ -49,6 +53,7 @@ export class ContractService {
     return await prisma.$transaction(async (tx) => {
       const contract = await this.contractRepo.createContract(
         userId,
+        companyId,
         data,
         car.price,
         tx,
@@ -64,9 +69,13 @@ export class ContractService {
   };
 
   // 계약 조회
-  getContracts = async (searchData: SearchOption) => {
+  getContracts = async (searchData: SearchOption, companyId: number) => {
     const { searchBy, keyword } = searchData;
-    const contracts = await this.contractRepo.getContracts(searchBy, keyword);
+    const contracts = await this.contractRepo.getContracts(
+      companyId,
+      searchBy,
+      keyword,
+    );
 
     const response = new ContractListResponseDto(contracts);
 
@@ -75,8 +84,9 @@ export class ContractService {
 
   // 계약 수정
   updateContract = async (contractId: number, params: UpdateContract) => {
-    const contract = await this.validateContract(contractId);
-    const carId = contract.carId;
+    const oldContract = await this.validateContract(contractId);
+    const oldCarId = oldContract.carId;
+    const newCarId = params.carId;
 
     if (Object.keys(params).length === 0) {
       throw new BadRequestError('수정할 데이터가 최소 한개이상 있어야 합니다.');
@@ -95,10 +105,14 @@ export class ContractService {
         contractId,
         updateData,
       );
-      // car status 변경을 위해 업데이트된 계약의 status 확인
       const targetCarStatus = this.determineCarStatus(updateContract.status);
-      // 변경된 계약 상태를 반영하여 차량 상태 업데이트
-      await this.contractRepo.updateCarStatus(carId, targetCarStatus, tx);
+      if (newCarId && oldCarId !== newCarId) {
+        await this.contractRepo.updateCarStatus(oldCarId, 'POSSESSION', tx);
+
+        await this.contractRepo.updateCarStatus(newCarId, targetCarStatus, tx);
+      } else {
+        await this.contractRepo.updateCarStatus(oldCarId, targetCarStatus, tx);
+      }
       return updateContract;
     });
 
