@@ -50,6 +50,7 @@ paths:
           required: false
           schema:
             type: string
+            enum: [companyName, companyCode]
         - name: keyword
           in: query
           description: 검색어
@@ -92,10 +93,11 @@ paths:
             default: 8
         - name: searchBy
           in: query
-          description: 검색 기준(companyName, companyCode)
+          description: 검색 기준(companyName, name, email)
           required: false
           schema:
             type: string
+            enum: [companyName, name, email]
         - name: keyword
           in: query
           description: 검색어
@@ -139,7 +141,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpdateCompanyReponse'
+                $ref: '#/components/schemas/UpdateCompanyResponse'
         '400':
           description: 잘못된 요청
         '401':
@@ -315,7 +317,7 @@ components:
           type: string
           example: 'COMP-001'
     # 업체 수정 응답
-    UpdateCompanyReponse:
+    UpdateCompanyResponse:
       type: object
       properties:
         id:

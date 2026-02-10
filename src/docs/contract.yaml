@@ -36,6 +36,7 @@ paths:
           required: false
           schema:
             type: string # 검색 기준은 보통 문자열입니다.
+            enum: [customerName, userName]
         - name: keyword
           in: query
           description: 검색어
@@ -193,7 +194,13 @@ components:
         status:
           type: string
           enum:
-            [carInspection, priceNegotiation, contractDraft, contractSuccess]
+            [
+              carInspection,
+              priceNegotiation,
+              contractDraft,
+              contractSuccessful,
+              contractFailed,
+            ]
           example: 'carInspection'
         resolutionDate:
           type: string
@@ -326,7 +333,13 @@ components:
         status:
           type: string
           enum:
-            [carInspection, priceNegotiation, contractDraft, contractSuccess]
+            [
+              carInspection,
+              priceNegotiation,
+              contractDraft,
+              contractSuccessful,
+              contractFailed,
+            ]
           example: 'carInspection'
         resolutionDate:
           type: string
