@@ -4,20 +4,16 @@ export type CarType = '세단' | '경차' | 'SUV';
 export interface Car {
   id: number;
   companyId: number;
-
   carNumber: string;
   manufacturer: string;
   model: string;
   type: CarType;
-
   manufacturingYear: number;
   mileage: number;
   price: number;
   accidentCount: number;
-
   explanation?: string | null;
   accidentDetails?: string | null;
-
   status: CarStatus;
 }
 
