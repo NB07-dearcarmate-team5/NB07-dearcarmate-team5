@@ -15,6 +15,10 @@ paths:
       responses:
         '201':
           description: 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCompanyResponse'
         '400':
           description: 잘못된 요청
         '401':
@@ -132,6 +136,10 @@ paths:
       responses:
         '200':
           description: 업체 수정 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCompanyReponse'
         '400':
           description: 잘못된 요청
         '401':
@@ -163,7 +171,7 @@ paths:
 
 components:
   schemas:
-    # 업체 생성
+    # 업체 생성 요청
     CreateCompanyRequest:
       type: object
       required:
@@ -176,6 +184,26 @@ components:
         companyCode:
           type: string
           example: 'COMP-001'
+    # 업체 생성 응답
+    CreateCompanyResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 생성된 업체의 고유 ID
+          example: 1
+        companyName:
+          type: string
+          description: 업체명
+          example: 'string'
+        companyCode:
+          type: string
+          description: 업체 코드
+          example: 'string'
+        userCount:
+          type: integer
+          description: 해당 업체에 소속된 유저 수
+          example: 3
     # 회사 목록 조회 응답
     CompanyListResponse:
       type: object
@@ -275,7 +303,7 @@ components:
               type: string
               example: '(주)그린테크'
           description: '소속 업체 정보'
-    # 업체 수정
+    # 업체 수정 요청
     UpdateCompanyRequest:
       type: object
       # 수정 시에는 모든 필드가 필수는 아니므로(optional)
@@ -286,6 +314,22 @@ components:
         companyCode:
           type: string
           example: 'COMP-001'
+    # 업체 수정 응답
+    UpdateCompanyReponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        companyName:
+          type: string
+          example: 'string'
+        companyCode:
+          type: string
+          example: 'string'
+        userCount:
+          type: integer
+          example: 3
     # 토큰
   securitySchemes:
     bearerAuth:
