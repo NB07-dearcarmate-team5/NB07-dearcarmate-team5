@@ -8,6 +8,7 @@ import {
   optional,
   pattern,
   coerce,
+  integer,
 } from 'superstruct';
 
 // 오전 9시
@@ -56,7 +57,7 @@ export const UpdateContractData = object({
       'contractFailed',
     ]),
   ),
-  contractPrice: optional(number()),
+  contractPrice: optional(integer()),
   resolutionDate: optional(string()),
   meetings: optional(
     array(
