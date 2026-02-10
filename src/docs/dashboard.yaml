@@ -42,25 +42,32 @@ components:
       properties:
         monthlySales:
           type: number
+          description: 이번 달 매출
           example: 123
         lastMonthSales:
           type: number
+          description: 지난 달 매출
           example: 123
         growthRate:
           type: number
+          description: 성장률
           example: 123
         proceedingContractsCount:
           type: number
+          description: 진행 중인 계약 건수
           example: 123
         completedContractsCount:
           type: number
+          description: 완료된 계약 건수
           example: 123
         contractsByCarType:
           type: array
+          description: 차종별 계약 건수 통계
           items:
             $ref: '#/components/schemas/CarTypeStat'
         salesByCarType:
           type: array
+          description: 차종별 매출 통계
           items:
             $ref: '#/components/schemas/CarTypeStat'
 
