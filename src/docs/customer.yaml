@@ -21,6 +21,7 @@ paths:
                 - name
                 - gender
                 - phoneNumber
+                - email
               properties:
                 name:
                   type: string
@@ -75,7 +76,6 @@ paths:
                   example: '서울'
                 email:
                   type: string
-                  nullable: true
                   description: 이메일 주소
                   example: 'test1@tester.com'
                 memo:
