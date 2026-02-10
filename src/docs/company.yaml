@@ -1,0 +1,294 @@
+paths:
+  /companies:
+    post:
+      tags:
+        - Company
+      summary: 업체 등록
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+      responses:
+        '201':
+          description: 등록 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 관리자 권한 없음
+    get:
+      tags:
+        - Company
+      summary: 업체 목록 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: 현재 페이지 번호
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: 페이지 당 아이템 수
+          required: false
+          schema:
+            type: integer
+            default: 8
+        - name: searchBy
+          in: query
+          description: 검색 기준(companyName, companyCode)
+          required: false
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          description: 검색어
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                # 목록 조회 응답 스키마
+                $ref: '#/components/schemas/CompanyListResponse'
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 관리자 권한 없음
+  /companies/users:
+    get:
+      tags:
+        - Company
+      summary: 유저 목록 조회
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: 현재 페이지 번호
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          description: 페이지 당 아이템 수
+          required: false
+          schema:
+            type: integer
+            default: 8
+        - name: searchBy
+          in: query
+          description: 검색 기준(companyName, companyCode)
+          required: false
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          description: 검색어
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 유저 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 관리자 권한 없음
+  /companies/{companyId}:
+    patch:
+      tags:
+        - Company
+      summary: 업체 정보 수정
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          description: 수정할 업체의 ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyRequest'
+      responses:
+        '200':
+          description: 업체 수정 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 관리자 권한 없음
+        '404':
+          description: 존재하지 않는 회사
+    delete:
+      tags:
+        - Company
+      summary: 등록된 업체 삭제
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: companyId
+          in: path
+          required: true
+          description: 삭제할 업체의 ID
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 업체 삭제 성공
+        '400':
+          description: 잘못된 요청
+        '401':
+          description: 관리자 권한 없음
+        '404':
+          description: 존재하지 않는 회사
+
+components:
+  schemas:
+    # 업체 생성
+    CreateCompanyRequest:
+      type: object
+      required:
+        - companyName
+        - companyCode
+      properties:
+        companyName:
+          type: string
+          example: '(주)부싼카'
+        companyCode:
+          type: string
+          example: 'COMP-001'
+    # 회사 목록 조회 응답
+    CompanyListResponse:
+      type: object
+      required:
+        - currentPage
+        - totalPages
+        - totalItemCount
+        - data
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 2
+        totalItemCount:
+          type: integer
+          example: 6
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompanyDetail'
+    # 응답 데이터 상세
+    CompanyDetail:
+      type: object
+      required:
+        - id
+        - companyName
+        - companyCode
+        - userCount
+      properties:
+        id:
+          type: integer
+          example: 1
+        companyName:
+          type: string
+          example: 'string'
+        companyCode:
+          type: string
+          example: 'string'
+        userCount:
+          type: integer
+          example: 3
+    # 유저 리스트 조회
+    UserListResponse:
+      type: object
+      required:
+        - currentPage
+        - totalPages
+        - totalItemCount
+        - data
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 3
+        totalItemCount:
+          type: integer
+          example: 24
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDetail'
+    # 유저 조회 상세
+    UserDetail:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - employeeNumber
+        - phoneNumber
+        - company
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: '홍길동'
+        email:
+          type: string
+          example: 'user@example.com'
+        employeeNumber:
+          type: string
+          example: '2026-001'
+          description: '사원 번호'
+        phoneNumber:
+          type: string
+          example: '010-1234-5678'
+        company:
+          type: object
+          properties:
+            companyName:
+              type: string
+              example: '(주)그린테크'
+          description: '소속 업체 정보'
+    # 업체 수정
+    UpdateCompanyRequest:
+      type: object
+      # 수정 시에는 모든 필드가 필수는 아니므로(optional)
+      properties:
+        companyName:
+          type: string
+          example: '(주)부싼카'
+        companyCode:
+          type: string
+          example: 'COMP-001'
+    # 토큰
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
