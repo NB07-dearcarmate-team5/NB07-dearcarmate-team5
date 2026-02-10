@@ -1,0 +1,78 @@
+tags:
+  - name: Dashboard
+paths:
+  /dashboard:
+    get:
+      summary: 대시보드 데이터 조회
+      tags:
+        - Dashboard
+      description: |
+        로그인한 유저의 회사 ID를 바탕으로 이번 달/지난달 매출, 성장률, 
+        계약 건수 및 차량 타입별 통계를 조회합니다.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+              example:
+                monthlySales: 123
+                lastMonthSales: 123
+                growthRate: 123
+                proceedingContractsCount: 123
+                completedContractsCount: 123
+                contractsByCarType:
+                  - { 'carType': '세단', 'count': 123 }
+                  - { 'carType': '경차', 'count': 123 }
+                  - { 'carType': 'SUV', 'count': 123 }
+                salesByCarType:
+                  - { 'carType': '세단', 'count': 123 }
+                  - { 'carType': '경차', 'count': 123 }
+                  - { 'carType': 'SUV', 'count': 123 }
+        '401':
+          description: Unauthorized
+
+components:
+  schemas:
+    DashboardResponse:
+      type: object
+      properties:
+        monthlySales:
+          type: number
+          example: 123
+        lastMonthSales:
+          type: number
+          example: 123
+        growthRate:
+          type: number
+          example: 123
+        proceedingContractsCount:
+          type: number
+          example: 123
+        completedContractsCount:
+          type: number
+          example: 123
+        contractsByCarType:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarTypeStat'
+        salesByCarType:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarTypeStat'
+
+    CarTypeStat:
+      type: object
+      properties:
+        carType:
+          type: string
+          description: 차량 유형
+          enum: ['세단', '경차', 'SUV']
+          example: '세단'
+        count:
+          type: number
+          description: 해당 차량 유형의 건수 또는 매출
+          example: 123

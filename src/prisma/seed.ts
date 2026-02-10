@@ -142,6 +142,7 @@ async function main() {
         carId: car.id,
         customerId: customer.id,
         userId: customer.userId,
+        companyId: customer.companyId,
         resolutionDate: statuses[i].includes('Successful') ? new Date() : null,
         meetings: {
           create: {

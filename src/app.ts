@@ -14,6 +14,8 @@ import customersRouter from './routes/customer.route';
 import contractRouter from './routes/contract.route';
 import { PORT } from './utils/constants';
 import imageRouter from './routes/image.route';
+import dashboardRouter from './routes/dashboard.route';
+
 
 const app = express();
 
@@ -68,9 +70,15 @@ app.use('/contracts', contractRouter);
 app.use('/cars', carRoutes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/images', imageRouter);
+app.use('/dashboard',dashboardRouter);
 
 // 3. 에러 핸들러 (모든 라우터 뒤에 위치)
 app.use(errorHandler);
+
+
+
+
+
 
 // 4. 서버 실행
 app.listen(PORT, () => {
