@@ -6,17 +6,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { ContractDocumentService } from '../services/contractDocument.service';
 import { ContractListQuery } from '../types/contractDocument.type';
+import { BadRequestError } from '../errors/errors';
 
-// ============================================
-// ContractDocumentController
-// ============================================
 export class ContractDocumentController {
   constructor(private service: ContractDocumentService) {}
 
-  // ==========================================
-  // GET /contractDocuments
-  // 계약서 업로드 시 계약 목록 조회
-  // ==========================================
   getContracts = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const query: ContractListQuery = {
@@ -25,62 +19,74 @@ export class ContractDocumentController {
         searchBy: req.query.searchBy as 'contractName' | 'userName' | undefined,
         keyword: req.query.keyword as string | undefined,
       };
-
-      const result = await this.service.getContracts(query);
+      const { companyId } = req.user!;
+      const result = await this.service.getContracts(query, companyId);
       res.status(200).json(result);
     } catch (error) {
       next(error);
     }
   };
 
-  // ==========================================
-  // GET /contractDocuments/draft
-  // 계약서 추가 시 계약 목록 조회
-  // ==========================================
   getDraftContracts = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const contracts = await this.service.getDraftContracts();
+      const { companyId } = req.user!;
+      const contracts = await this.service.getDraftContracts(companyId);
       res.status(200).json(contracts);
     } catch (error) {
       next(error);
     }
   };
 
-  // ==========================================
-  // POST /contractDocuments/upload
-  // 계약서 업로드
-  // ==========================================
-  // TODO: uploadDocuments
-  // @body contractId: string
-  // @files files: 업로드 파일 배열 (multer)
-  // 응답: 201 Created + ContractDocumentResponseDto[]
   uploadDocuments = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // TODO: 구현
-      // 1. req.body.contractId 추출
-      // 2. req.files 추출 (multer)
-      // 3. service.uploadDocuments() 호출
-      // 4. 201 응답 반환
-      throw new Error('Not implemented');
+      const contractId = Number(req.body.contractId);
+      if (!contractId || isNaN(contractId)) {
+        throw new BadRequestError('계약 ID가 필요합니다');
+      }
+
+      const file = req.file;
+      if (!file) {
+        throw new BadRequestError('파일이 필요합니다');
+      }
+
+      const result = await this.service.uploadDocument(contractId, file);
+      res.status(200).json(result);
     } catch (error) {
       next(error);
     }
   };
 
-  // ==========================================
-  // GET /contractDocuments/{contractDocumentId}/download
-  // 계약서 다운로드
-  // ==========================================
-  // TODO: downloadDocument
-  // @param contractDocumentId: string (URL 파라미터)
-  // 응답: 200 OK + DownloadResponseDto (또는 파일 스트림)
   downloadDocument = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // TODO: 구현
-      // 1. req.params.contractDocumentId 추출
-      // 2. service.downloadDocument() 호출
-      // 3. Presigned URL 또는 파일 스트림 응답
-      throw new Error('Not implemented');
+      const contractDocumentId = Number(req.params.contractDocumentId);
+      if (!contractDocumentId || isNaN(contractDocumentId)) {
+        throw new BadRequestError('잘못된 요청입니다');
+      }
+
+      const { stream, fileName, mimeType } = await this.service.downloadDocument(
+        contractDocumentId
+      );
+
+      res.setHeader('Content-Type', mimeType);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${encodeURIComponent(fileName)}"`
+      );
+      stream.pipe(res);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  deleteDocument = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const contractDocumentId = Number(req.params.contractDocumentId);
+      if (!contractDocumentId || isNaN(contractDocumentId)) {
+        throw new BadRequestError('잘못된 요청입니다');
+      }
+
+      await this.service.deleteDocument(contractDocumentId);
+      res.status(200).json({ message: '계약서 문서가 삭제되었습니다' });
     } catch (error) {
       next(error);
     }
