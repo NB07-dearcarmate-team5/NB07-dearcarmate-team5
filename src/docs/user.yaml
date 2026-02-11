@@ -132,7 +132,7 @@ components:
         - employeeNumber
         - phoneNumber
         - password
-        - passwordConfirm
+        - passwordConfirmation
         - companyName
         - companyCode
       properties:
@@ -159,7 +159,7 @@ components:
           format: password
           description: 비밀번호 (8~16자, 영문+숫자)
           example: password1
-        passwordConfirm:
+        passwordConfirmation:
           type: string
           format: password
           description: 비밀번호 확인
@@ -193,7 +193,7 @@ components:
           type: string
           description: 새 비밀번호
           example: password2
-        passwordConfirm:
+        passwordConfirmation:
           type: string
           description: 새 비밀번호 확인
           example: password2
