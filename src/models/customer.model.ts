@@ -27,10 +27,12 @@ export class CustomerDto {
         this.companyId = data.companyId;
         this.contractCount = data.contractCount ?? 0;
     }
-    toResponse(): CleanCustomer {
+toResponse(): CleanCustomer {
         const { userId, companyId, ...cleanData } = this;
-        const response: CleanCustomer = cleanData; 
-        return response;
-    }
+        return {
+            ...cleanData,
+            gender: this.gender.toLowerCase() as 'male' | 'female' 
+        };
 }
 
+}
