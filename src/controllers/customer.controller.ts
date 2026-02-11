@@ -49,11 +49,15 @@ export async function updateCustomer(req: Request, res: Response) {
   const updateData = create(req.body, UpdateCustomerStruct) as UpdateCustomer;
   const { companyId, userId } = req.user!;
 
+  const { gender, ...restUpdateData } = updateData;
+
   const finalUpdateData: UpdateCustomerRequest = {
-    ...updateData,
-    gender: updateData.gender.toUpperCase() as Gender,
-    userId,
-    companyId,
+    ...restUpdateData, //소문자 gender가 빠진 나머지 필드들
+    userId,             
+    companyId,          
+    
+    //gender 필드가 있는 경우에만 변환하여 포함
+    ...(gender && { gender: gender.toUpperCase() as Gender }),
   };
 
   const result = await customerService.updateCustomerService(
