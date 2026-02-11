@@ -6,7 +6,7 @@ import {
   CarListQueryType,
 } from '../structs/car.struct';
 import type { Car, CarListItem } from '../types/car.type';
-import prisma from '../prisma';
+import prisma from '../prisma/prisma';
 import { CarModel } from '../models/car.model';
 
 export interface CarRepository {

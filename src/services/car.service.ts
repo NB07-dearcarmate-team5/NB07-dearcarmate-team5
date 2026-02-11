@@ -3,9 +3,10 @@ import {
   UpdateCarBodyType as UpdateCarInput,
   CarListQueryType as CarListQueryInput,
 } from '../structs/car.struct';
-import { Car, CarListResponse } from '../types/car.type';
+import { Car, CarListResponse, CarModel } from '../types/car.type';
 import { CarRepository } from '../repositories/car.repository';
 import { BadRequestError, NotFoundError } from '../errors/errors';
+import { CAR_MASTER_DATA } from '../constants/car.constant';
 
 export class CarService {
   constructor(private readonly carRepository: CarRepository) {}
@@ -85,11 +86,7 @@ export class CarService {
     return { message: '차량 삭제 성공' };
   }
 
-  async getCarModels(): Promise<string[]> {
-    const models = await this.carRepository.getCarModels();
-    if (!models) {
-      throw new BadRequestError('잘못된 요청입니다');
-    }
-    return models;
+  async getCarModels(): Promise<CarModel[]> {
+    return CAR_MASTER_DATA as CarModel[];
   }
 }
