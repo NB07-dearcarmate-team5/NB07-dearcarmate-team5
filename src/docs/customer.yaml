@@ -313,12 +313,6 @@ paths:
           $ref: '#/components/responses/NotFound'
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
   responses:
     BadRequest:
       description: 잘못된 요청입니다
