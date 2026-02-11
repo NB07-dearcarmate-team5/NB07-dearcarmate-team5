@@ -22,7 +22,7 @@ export const GetCustomerListParamsStruct = object({
 page: defaulted(integerString, 1),
 pageSize: defaulted(integerString, 10),
 searchBy: optional(enums(['name', 'email'])),
-keyword: optional(nonempty(string())),
+keyword: optional((string())),
 });
 
 //고객 생성용 타입
