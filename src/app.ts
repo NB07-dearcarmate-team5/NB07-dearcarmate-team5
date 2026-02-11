@@ -15,12 +15,22 @@ import contractRouter from './routes/contract.route';
 import { PORT } from './utils/constants';
 import imageRouter from './routes/image.route';
 import dashboardRouter from './routes/dashboard.route';
-
+import cors from 'cors';
 
 const app = express();
 
 // 1. 미들웨어 설정
 app.use(morgan('dev'));
+
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // 프론트엔드 주소 (Next.js 포트)
+    credentials: true, // 쿠키나 인증 헤더(Authorization)를 주고받기 위해 필수!
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  }),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -31,7 +41,7 @@ const servers = [
   {
     url: `http://localhost:${PORT}`,
     description: '로컬 개발 서버',
-  }
+  },
 ];
 
 if (process.env.RENDER_EXTERNAL_URL) {
@@ -50,11 +60,11 @@ const swaggerOptions: swaggerJsDoc.Options = {
       description: 'NB 7기 5팀 중급 프로젝트 API',
     },
     servers: servers,
-      },
+  },
   apis: [
-    path.join(process.cwd(), './src/docs/swagger.yaml'), 
-    path.join(process.cwd(), './src/docs/!(swagger).yaml'), 
-  ], 
+    path.join(process.cwd(), './src/docs/swagger.yaml'),
+    path.join(process.cwd(), './src/docs/!(swagger).yaml'),
+  ],
 };
 
 const swaggerSpec = swaggerJsDoc(swaggerOptions);
@@ -62,17 +72,13 @@ const swaggerSpec = swaggerJsDoc(swaggerOptions);
 app.use(
   '/api-docs',
   swaggerUi.serve,
-  swaggerUi.setup(
-    swaggerSpec, 
-    undefined, 
-    {
-      swaggerOptions: {
-        tagsSorter: undefined, 
-        operationsSorter: undefined,
-        defaultModelsExpandDepth: -1,
-      },
-    }
-  )
+  swaggerUi.setup(swaggerSpec, undefined, {
+    swaggerOptions: {
+      tagsSorter: undefined,
+      operationsSorter: undefined,
+      defaultModelsExpandDepth: -1,
+    },
+  }),
 );
 // 라우터 설정 (계획서의 routes 폴더 활용)
 app.use('/auth', authRouter);
@@ -83,15 +89,10 @@ app.use('/contracts', contractRouter);
 app.use('/cars', carRoutes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/images', imageRouter);
-app.use('/dashboard',dashboardRouter);
+app.use('/dashboard', dashboardRouter);
 
 // 3. 에러 핸들러 (모든 라우터 뒤에 위치)
 app.use(errorHandler);
-
-
-
-
-
 
 // 4. 서버 실행
 app.listen(PORT, () => {

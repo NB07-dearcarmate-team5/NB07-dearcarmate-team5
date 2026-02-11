@@ -1,12 +1,6 @@
 import 'dotenv/config';
-import {
-  PrismaClient,
-  CarStatus,
-  Gender,
-  ContractStatus,
-} from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-// bcryptjs 대신 bcrypt 사용
 import bcrypt from 'bcrypt';
 
 const adapter = new PrismaPg({
@@ -15,151 +9,48 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
-// 헬퍼 함수들 (기존과 동일)
-function pad(num: number, size: number) {
-  return String(num).padStart(size, '0');
-}
-function makeKoreanPhone(i: number) {
-  return `010${1000 + (i % 9000)}${1000 + ((i * 7) % 9000)}`;
-}
-function makeCarNumber(i: number) {
-  return `${10 + (i % 90)}${['가', '나', '다'][i % 3]}${1000 + ((i * 13) % 9000)}`;
-}
-function addDays(base: Date, days: number) {
-  const d = new Date(base);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
 async function main() {
-  const COMPANY_COUNT = 2;
-  const USER_COUNT = 4;
-  const ADMIN_EMAIL = 'admin@sample.com';
+  console.log('🛡️ 초기 어드민 계정 생성을 시작합니다...');
 
-  // 1) 회사 생성
-  const companies = [];
-  for (let i = 1; i <= COMPANY_COUNT; i++) {
-    const companyCode = `COMP-${pad(i, 3)}`;
-    const company = await prisma.company.upsert({
-      where: { companyCode },
-      update: { companyName: `테스트회사${i}` },
-      create: { companyCode, companyName: `테스트회사${i}` },
-    });
-    companies.push(company);
-  }
+  // 1. 필수 회사 정보 생성 (어드민이 소속될 기본 회사)
+  const company = await prisma.company.upsert({
+    where: { companyCode: 'MAIN-001' },
+    update: {}, // 이미 있으면 업데이트 안 함
+    create: {
+      companyCode: 'MAIN-001',
+      companyName: '(주) 디어카메이트 본사',
+    },
+  });
 
-  // 2) 어드민 생성 (bcrypt.hash 사용)
-  const adminPasswordHash = await bcrypt.hash('admin1234!', 10);
-  await prisma.user.upsert({
+  // 2. 어드민 계정 정보 설정
+  const ADMIN_EMAIL = 'admin@sample.com'; // 로컬 .env의 정보와 맞춰주세요
+  const ADMIN_PASSWORD = 'admin1234!'; // 실제 사용하실 비밀번호
+  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
+
+  // 3. 어드민 계정 생성
+  const adminUser = await prisma.user.upsert({
     where: { email: ADMIN_EMAIL },
     update: {
-      password: adminPasswordHash,
-      isAdmin: true,
+      password: hashedPassword,
+      isAdmin: true, // 이미 있는 계정도 어드민 권한 부여
     },
     create: {
       email: ADMIN_EMAIL,
-      password: adminPasswordHash,
-      name: '관리자',
+      password: hashedPassword,
+      name: '시스템관리자',
       employeeNumber: 'ADMIN-001',
       phoneNumber: '01000000000',
       isAdmin: true,
-      companyId: companies[0].id,
+      companyId: company.id,
     },
   });
 
-  // 3) 일반 유저 생성 (bcrypt.hash 사용)
-  const userPasswordHash = await bcrypt.hash('password1234!', 10);
-  for (let i = 1; i <= USER_COUNT; i++) {
-    const company = companies[i % companies.length];
-    await prisma.user.upsert({
-      where: { email: `user${i}@test.com` },
-      update: { password: userPasswordHash },
-      create: {
-        email: `user${i}@test.com`,
-        password: userPasswordHash,
-        name: `사원${i}`,
-        employeeNumber: `EMP-${i}`,
-        phoneNumber: makeKoreanPhone(i),
-        companyId: company.id,
-      },
-    });
-  }
-
-  // 4) 차량 생성
-  const carRows = [];
-  let carSeq = 1;
-  for (const company of companies) {
-    for (let j = 0; j < 5; j++) {
-      carRows.push({
-        carNumber: makeCarNumber(carSeq++),
-        manufacturer: '현대',
-        model: '아반떼',
-        type: '세단',
-        manufacturingYear: 2022,
-        mileage: 10000,
-        price: BigInt(25000000),
-        status: CarStatus.POSSESSION,
-        companyId: company.id,
-      });
-    }
-  }
-  await prisma.car.createMany({ data: carRows, skipDuplicates: true });
-
-  // 5) 고객 생성
-  const allUsers = await prisma.user.findMany({ where: { isAdmin: false } });
-  const customerRows = [];
-  let custSeq = 1;
-  for (const u of allUsers) {
-    for (let k = 0; k < 3; k++) {
-      customerRows.push({
-        name: `고객${custSeq}`,
-        gender: Gender.MALE,
-        phoneNumber: makeKoreanPhone(100 + custSeq),
-        email: `cust${custSeq++}@test.com`,
-        userId: u.id,
-        companyId: u.companyId,
-      });
-    }
-  }
-  await prisma.customer.createMany({
-    data: customerRows,
-    skipDuplicates: true,
-  });
-
-  // 6) 계약 & 미팅 & 알람
-  const cars = await prisma.car.findMany();
-  const customers = await prisma.customer.findMany();
-  const statuses = Object.values(ContractStatus);
-
-  for (let i = 0; i < statuses.length; i++) {
-    const car = cars[i % cars.length];
-    const customer = customers[i % customers.length];
-
-    await prisma.contract.create({
-      data: {
-        contractPrice: car.price,
-        status: statuses[i],
-        carId: car.id,
-        customerId: customer.id,
-        userId: customer.userId,
-        companyId: customer.companyId,
-        resolutionDate: statuses[i].includes('Successful') ? new Date() : null,
-        meetings: {
-          create: {
-            date: addDays(new Date(), 7),
-            alarms: { create: { alarmTime: addDays(new Date(), 6) } },
-          },
-        },
-      },
-    });
-  }
-
-  console.log('🚀 시딩 완료! (bcrypt 사용)');
+  console.log(`✅ 어드민 계정 생성 완료: ${adminUser.email}`);
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ 시딩 중 에러 발생:', e);
     process.exit(1);
   })
   .finally(async () => {
