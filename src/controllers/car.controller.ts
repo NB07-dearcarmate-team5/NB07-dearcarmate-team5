@@ -28,7 +28,7 @@ export class CarController {
 
   getCarModels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       const result = await this.carService.getCarModels();
-      res.status(200).json(result);
+      res.status(200).json({ data : result });
   };
 
   getCarById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
