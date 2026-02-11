@@ -5,7 +5,7 @@ import {
   UpdateCarBodyType,
   CarListQueryType
 } from '../structs/car.struct'; 
-import type { Car, CarListItem, CarStatus } from '../types/car.type';
+import type { Car, CarListItem} from '../types/car.type';
 import prisma from '../prisma';
 import { CarModel } from '../models/car.model'; 
 
