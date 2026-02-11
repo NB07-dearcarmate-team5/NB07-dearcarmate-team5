@@ -11,12 +11,12 @@ export const SignUpStruct = refine(
     employeeNumber: size(string(), 1, 100),
     phoneNumber: Phone,
     password: Password,
-    passwordConfirm: size(string(), 1, 100),
+    passwordConfirmation: size(string(), 1, 100),
     companyName: size(string(), 1, 100),
     companyCode: size(string(), 1, 100),
   }),
   'SignUpStruct',
-  (data) => data.password === data.passwordConfirm || '비밀번호와 비밀번호 확인이 일치하지 않습니다.'
+  (data) => data.password === data.passwordConfirmation || '비밀번호와 비밀번호 확인이 일치하지 않습니다.'
 );
 
 export const LoginStruct = object({
@@ -30,12 +30,12 @@ export const UpdateUserStruct = refine(
     employeeNumber: optional(size(string(), 1, 100)),
     phoneNumber: optional(Phone),
     password: optional(Password),
-    passwordConfirm: optional(size(string(), 1, 100)),
+    passwordConfirmation: optional(size(string(), 1, 100)),
     currentPassword: string(),
   }),
   'UpdateUserStruct',
   (data) => {
-    if (data.password && data.password !== data.passwordConfirm) {
+    if (data.password && data.password !== data.passwordConfirmation) {
       return '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
     }
     return true;
