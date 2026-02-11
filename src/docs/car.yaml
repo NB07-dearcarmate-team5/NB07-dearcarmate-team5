@@ -144,7 +144,7 @@ paths:
                     carNumber: "34나 7890"
                     manufacturer: "기아"
                     model: "K3"
-                    type: " hatchback"
+                    type: "hatchback"
                     manufacturingYear: 2020
                     mileage: 15
                     price: 1200000
@@ -288,12 +288,12 @@ components:
 
     CarCreateRequest:
       type: object
-      required: [carNumber, manufacturer, model, price] 
+      required: [carNumber, manufacturer, model, type, manufacturingYear, mileage, accidentCount, price] 
       properties:
         carNumber: { type: string, example: "12가 3456" }
-        manufacturer: { type: string, example: "기아" }
+        manufacturer: { type: string, enum: ["기아", "쉐보레", "현대", "제네시스", "삼성", "쌍용", "기타"], example: "기아" }
         model: { type: string, example: "K5" }
-        type: { type: string, example: "세단" }
+        type: { type: string, enum: ["세단", "경차", "SUV"], example: "세단" }
         manufacturingYear: { type: integer, example: 2020 }
         mileage: { type: integer, example: 30 }
         price: { type: integer, example: 1000000 }
