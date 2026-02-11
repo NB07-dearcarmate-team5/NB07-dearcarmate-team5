@@ -72,12 +72,12 @@ export const CreateCustomerStruct = object({
 
 //고객 수정용 타입
 export const UpdateCustomerStruct = object({
-  name: pattern(size(string(), 1, 20), /^[a-zA-Z가-힣\s0-9]+$/),
-  gender: enums(['male', 'female']), 
-  phoneNumber: pattern(size(string(), 10, 15), /^[0-9-]+$/),
+  name: optional(pattern(size(string(), 1, 20), /^[a-zA-Z가-힣\s0-9]+$/)),
+  gender: optional(enums(['male', 'female'])), 
+  phoneNumber: optional(pattern(size(string(), 10, 15), /^[0-9-]+$/)),
   ageGroup: optional(nullable(enums(AGE_GROUPS))),
   region: optional(nullable(enums(REGIONS))),
-  email: nonempty(string()),
+  email: optional(nonempty(string())),
   memo: optional(nullable(string())),
 });
 

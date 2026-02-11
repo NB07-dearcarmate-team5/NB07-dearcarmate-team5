@@ -135,8 +135,8 @@ paths:
                 $ref: '#/components/schemas/CustomerListResponse'
               example:
                 currentPage: 1
-                tomaleages: 5
-                tomaletemCount: 48
+                totalPages: 5
+                totalItemCount: 48
                 data:
                   - id: 1
                     name: '홍길동'
