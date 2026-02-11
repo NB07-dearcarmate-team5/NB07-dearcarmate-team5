@@ -8,107 +8,108 @@ import {
   DraftContractResponseDto,
   ContractListQuery,
   ContractListResponseDto,
+  ContractDocumentResponseDto,
 } from '../types/contractDocument.type';
-// TODO: 추후 구현 시 import
-// import { uploadFile, getDownloadUrl, deleteFile, generateFileKey } from '../utils/s3.util';
-// import { sendContractEmail } from '../utils/email.util';
-// import { NotFoundError } from '../errors/errorHandler';
+import { uploadFile, getFileStream, deleteFile, generateFileKey } from '../utils/s3.util';
+import { sendContractEmail } from '../utils/email.util';
+import { NotFoundError, BadRequestError } from '../errors/errors';
+import { Readable } from 'stream';
 
-// ============================================
-// ContractDocumentService
-// ============================================
 export class ContractDocumentService {
   constructor(private repository: ContractDocumentRepository) {}
 
-  // ==========================================
-  // GET /contractDocuments
-  // 계약서 업로드 시 계약 목록 조회
-  // ==========================================
-  async getContracts(query: ContractListQuery): Promise<ContractListResponseDto> {
+  async getContracts(
+    query: ContractListQuery,
+    companyId: number
+  ): Promise<ContractListResponseDto> {
     const page = query.page || 1;
     const pageSize = query.pageSize || 10;
 
-    const { data, total } = await this.repository.findContracts(query);
+    const { data, total } = await this.repository.findContracts(query, companyId);
 
     return {
       currentPage: page,
-      totalPages: Math.ceil(total / pageSize),
+      totalPages: total === 0 ? 1 : Math.ceil(total / pageSize),
       totalItemCount: total,
       data,
     };
   }
 
-  // ==========================================
-  // GET /contractDocuments/draft
-  // 계약서 추가 시 계약 목록 조회
-  // ==========================================
-  async getDraftContracts(): Promise<DraftContractResponseDto[]> {
-    return this.repository.findDraftContracts();
+  async getDraftContracts(companyId: number): Promise<DraftContractResponseDto[]> {
+    return this.repository.findDraftContracts(companyId);
   }
 
-  // ==========================================
-  // POST /contractDocuments/upload
-  // 계약서 업로드
-  // ==========================================
-  // TODO: uploadDocuments - 계약서 파일 업로드
-  // @param contractId: string - 계약 ID
-  // @param files: Express.Multer.File[] - 업로드 파일 배열
-  // @param customerEmail: string - 고객 이메일 (이메일 발송용)
-  // @returns Promise<ContractDocumentResponseDto[]>
-  // 로직:
-  // 1. 각 파일에 대해:
-  //    a. generateFileKey로 S3 키 생성
-  //    b. uploadFile로 S3에 업로드
-  //    c. repository.create로 DB에 메타데이터 저장
-  // 2. 모든 파일 업로드 완료 후 고객에게 이메일 발송 (sendContractEmail)
-  // 3. 업로드 결과 반환
-  async uploadDocuments(
-    contractId: string,
-    files: any[],
-    customerEmail?: string
-  ): Promise<any[]> {
-    // TODO: 구현
-    // 1. 파일 업로드 (S3)
-    // 2. DB 저장
-    // 3. 이메일 발송 (계약서 첨부)
-    throw new Error('Not implemented');
+  async uploadDocument(
+    contractId: number,
+    file: Express.Multer.File
+  ): Promise<ContractDocumentResponseDto> {
+    if (!file) {
+      throw new BadRequestError('파일이 필요합니다');
+    }
+
+    const fileKey = generateFileKey(contractId, file.originalname);
+    await uploadFile(file.buffer, fileKey, file.mimetype);
+
+    const document = await this.repository.create({
+      contractId,
+      fileName: file.originalname,
+      fileKey,
+      fileSize: file.size,
+      mimeType: file.mimetype,
+    });
+
+    // 이메일 발송 (비동기 - 실패해도 업로드는 성공)
+    try {
+      const docWithContract = await this.repository.findById(document.id);
+      if (docWithContract?.contract) {
+        const contractName = `${docWithContract.contract.car.model} - ${docWithContract.contract.customer.name}`;
+        await sendContractEmail(
+          docWithContract.contract.customer.email,
+          docWithContract.contract.customer.name,
+          contractName,
+          [{ filename: file.originalname, content: file.buffer }]
+        );
+      }
+    } catch (emailError) {
+      console.error('이메일 발송 실패:', emailError);
+    }
+
+    return { contractDocumentId: document.id };
   }
 
-  // ==========================================
-  // GET /contractDocuments/{contractDocumentId}/download
-  // 계약서 다운로드
-  // ==========================================
-  // TODO: downloadDocument - 계약서 다운로드 URL 생성
-  // @param contractDocumentId: string - 문서 ID
-  // @returns Promise<DownloadResponseDto>
-  // 로직:
-  // 1. repository.findById로 문서 조회
-  // 2. 문서가 없으면 NotFoundError
-  // 3. getDownloadUrl로 Presigned URL 생성
-  // 4. 다운로드 정보 반환 (url, fileName, mimeType)
-  async downloadDocument(contractDocumentId: string): Promise<any> {
-    // TODO: 구현
-    throw new Error('Not implemented');
+  async downloadDocument(
+    contractDocumentId: number
+  ): Promise<{ stream: Readable; fileName: string; mimeType: string }> {
+    const document = await this.repository.findById(contractDocumentId);
+    if (!document) {
+      throw new NotFoundError('계약서 문서를 찾을 수 없습니다');
+    }
+
+    const stream = await getFileStream(document.fileKey);
+    return {
+      stream,
+      fileName: document.fileName,
+      mimeType: document.mimeType,
+    };
   }
 
-  // ==========================================
-  // 계약서 삭제 (계약 수정 API 활용)
-  // ==========================================
-  // TODO: deleteDocument - 단일 문서 삭제
-  // @param contractDocumentId: string
-  // 로직:
-  // 1. repository.findById로 문서 조회
-  // 2. deleteFile로 S3에서 삭제
-  // 3. repository.delete로 DB에서 삭제
-  async deleteDocument(contractDocumentId: string): Promise<void> {
-    // TODO: 구현
-    throw new Error('Not implemented');
+  async deleteDocument(contractDocumentId: number): Promise<void> {
+    const document = await this.repository.findById(contractDocumentId);
+    if (!document) {
+      throw new NotFoundError('계약서 문서를 찾을 수 없습니다');
+    }
+
+    await deleteFile(document.fileKey);
+    await this.repository.delete(contractDocumentId);
   }
 
-  // TODO: deleteDocumentsByIds - 여러 문서 삭제
-  // @param documentIds: string[]
-  async deleteDocumentsByIds(documentIds: string[]): Promise<void> {
-    // TODO: 구현
-    throw new Error('Not implemented');
+  async deleteDocumentsByIds(documentIds: number[]): Promise<void> {
+    const documents = await this.repository.findByIds(documentIds);
+    if (documents.length === 0) {
+      throw new NotFoundError('삭제할 문서를 찾을 수 없습니다');
+    }
+
+    await Promise.all(documents.map((doc) => deleteFile(doc.fileKey)));
+    await this.repository.deleteByIds(documentIds);
   }
 }

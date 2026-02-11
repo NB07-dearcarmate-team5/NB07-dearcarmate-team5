@@ -7,9 +7,8 @@ import { Router } from 'express';
 import { ContractDocumentController } from '../controllers/contractDocument.controller';
 import { ContractDocumentService } from '../services/contractDocument.service';
 import { ContractDocumentRepository } from '../repositories/contractDocument.repository';
-// TODO: 추후 구현 시 import
-// import { contractDocumentUpload, validateTotalSize } from '../middleware/upload.middleware';
-// import { authMiddleware } from '../middleware/auth.middleware';
+import { contractDocumentUpload } from '../middlewares/fileUpload.middleware';
+import { authenticateToken } from '../middlewares/authenticateToken';
 
 const router = Router();
 
@@ -18,8 +17,8 @@ const repository = new ContractDocumentRepository();
 const service = new ContractDocumentService(repository);
 const controller = new ContractDocumentController(service);
 
-// TODO: 인증 미들웨어 적용 (필요시)
-// router.use(authMiddleware);
+// 인증 미들웨어 적용
+router.use(authenticateToken);
 
 /**
  * GET /contractDocuments
@@ -37,19 +36,20 @@ router.get('/draft', controller.getDraftContracts);
  * POST /contractDocuments/upload
  * 계약서 업로드
  * Content-Type: multipart/form-data
- * Body: contractId, files[]
+ * Body: contractId, contractDocument (File)
  */
-// router.post(
-//   '/upload',
-//   contractDocumentUpload,
-//   validateTotalSize,
-//   controller.uploadDocuments
-// );
+router.post('/upload', contractDocumentUpload, controller.uploadDocuments);
 
 /**
  * GET /contractDocuments/:contractDocumentId/download
  * 계약서 다운로드
  */
-// router.get('/:contractDocumentId/download', controller.downloadDocument);
+router.get('/:contractDocumentId/download', controller.downloadDocument);
+
+/**
+ * DELETE /contractDocuments/:contractDocumentId
+ * 계약서 문서 삭제
+ */
+router.delete('/:contractDocumentId', controller.deleteDocument);
 
 export default router;
