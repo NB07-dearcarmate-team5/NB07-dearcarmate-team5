@@ -25,7 +25,11 @@ export class UserController {
     return res.status(200).json(result);
   };
 
-  deleteUserByAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  deleteUserByAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     if (!req.user?.isAdmin) {
       throw new UnauthorizedError('관리자 권한이 필요합니다.');
     }
