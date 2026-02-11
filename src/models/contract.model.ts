@@ -59,6 +59,14 @@ export class ContractListResponseDto {
   }
 
   private groupByStatus(contracts: ContractWithRelations[]): GroupedContracts {
+    const initialGroups: GroupedContracts = {
+      carInspection: { totalItemCount: 0, data: [] },
+      priceNegotiation: { totalItemCount: 0, data: [] },
+      contractDraft: { totalItemCount: 0, data: [] },
+      contractSuccessful: { totalItemCount: 0, data: [] },
+      contractFailed: { totalItemCount: 0, data: [] },
+    };
+
     return contracts.reduce((acc: GroupedContracts, contract) => {
       const status = contract.status;
 
@@ -72,6 +80,6 @@ export class ContractListResponseDto {
       acc[status]!.totalItemCount++;
 
       return acc;
-    }, {});
+    }, initialGroups);
   }
 }
