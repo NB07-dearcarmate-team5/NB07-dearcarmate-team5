@@ -12,51 +12,58 @@
  * - SMTP_FROM=noreply@dearcarmate.com
  */
 
-// TODO: nodemailer import
-// import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 
-// ============================================
-// 이메일 전송 설정
-// ============================================
-// TODO: createTransporter - SMTP 트랜스포터 생성
-// - host, port, secure, auth 설정
-export const createTransporter = () => {
-  // TODO: nodemailer.createTransport 사용
-  throw new Error('Not implemented');
+let transporter: nodemailer.Transporter | null = null;
+
+export const createTransporter = (): nodemailer.Transporter => {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+  return transporter;
 };
 
-// ============================================
-// 계약서 첨부 이메일 발송
-// ============================================
-// TODO: sendContractEmail - 계약서 등록 시 고객에게 이메일 발송
-// @param to: string - 수신자 이메일
-// @param customerName: string - 고객명
-// @param contractName: string - 계약서명
-// @param attachments: { filename, path }[] - 첨부 파일 (Presigned URL 또는 버퍼)
 export const sendContractEmail = async (
   to: string,
   customerName: string,
   contractName: string,
-  attachments: { filename: string; path: string }[]
+  attachments: { filename: string; content: Buffer }[]
 ): Promise<void> => {
-  // TODO: 구현
-  // 1. 이메일 템플릿 작성
-  // 2. 첨부 파일 추가
-  // 3. transporter.sendMail 호출
-  throw new Error('Not implemented');
+  const transport = createTransporter();
+  const html = getContractEmailTemplate(customerName, contractName);
+
+  await transport.sendMail({
+    from: process.env.SMTP_FROM,
+    to,
+    subject: `[DearCarMate] ${contractName} 계약서가 등록되었습니다`,
+    html,
+    attachments: attachments.map((a) => ({
+      filename: a.filename,
+      content: a.content,
+    })),
+  });
 };
 
-// ============================================
-// 이메일 템플릿
-// ============================================
-// TODO: getContractEmailTemplate - 이메일 HTML 템플릿
-// @param customerName: string
-// @param contractName: string
-// @returns string - HTML 문자열
 export const getContractEmailTemplate = (
   customerName: string,
   contractName: string
 ): string => {
-  // TODO: HTML 템플릿 반환
-  return '';
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #333;">계약서 등록 안내</h2>
+      <p>${customerName} 고객님, 안녕하세요.</p>
+      <p><strong>${contractName}</strong> 관련 계약서가 등록되었습니다.</p>
+      <p>첨부된 파일을 확인해 주시기 바랍니다.</p>
+      <hr style="border: 1px solid #eee; margin: 20px 0;" />
+      <p style="color: #888; font-size: 12px;">본 메일은 DearCarMate에서 자동 발송되었습니다.</p>
+    </div>
+  `;
 };
