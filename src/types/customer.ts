@@ -23,6 +23,19 @@ export interface CustomerData extends BaseCustomer {
   id: number; 
 }
 
+export interface UpdateCustomerRequest {
+  name: string;
+  gender: Gender; 
+  phoneNumber: string;
+  email: string;
+  ageGroup?: string | null | undefined;
+  region?: string | null | undefined;
+  memo?: string | null | undefined;
+  userId: number;
+  companyId: number;
+  contractCount?: number;
+}
+
 //목록 조회 응답 
 export interface CustomerList {
   currentPage: number;
@@ -34,7 +47,7 @@ export interface CustomerList {
 export interface CleanCustomer {
   id: number;
   name: string;
-  gender: Gender;
+  gender: Gender | 'male' | 'female';
   phoneNumber: string;
   ageGroup: string | null;
   region: string | null;

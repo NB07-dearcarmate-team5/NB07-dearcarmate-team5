@@ -28,8 +28,8 @@ paths:
                   example: '홍길동'
                 gender:
                   type: string
-                  enum: [MALE, FEMALE]
-                  example: 'MALE'
+                  enum: [male, female]
+                  example: 'male'
                 phoneNumber:
                   type: string
                   example: '010-1234-5678'
@@ -135,12 +135,12 @@ paths:
                 $ref: '#/components/schemas/CustomerListResponse'
               example:
                 currentPage: 1
-                totalPages: 5
-                totalItemCount: 48
+                tomaleages: 5
+                tomaletemCount: 48
                 data:
                   - id: 1
                     name: '홍길동'
-                    gender: 'MALE'
+                    gender: 'male'
                     phoneNumber: '010-1234-5678'
                     ageGroup: '30대'
                     region: '서울'
@@ -149,7 +149,7 @@ paths:
                     contractCount: 5
                   - id: 2
                     name: '김철수'
-                    gender: 'MALE'
+                    gender: 'male'
                     phoneNumber: '010-9988-7766'
                     ageGroup: '50대'
                     region: '경기'
@@ -158,7 +158,7 @@ paths:
                     contractCount: 12
                   - id: 3
                     name: '이영희'
-                    gender: 'FEMALE'
+                    gender: 'female'
                     phoneNumber: '010-1111-2222'
                     ageGroup: '20대'
                     region: '인천'
@@ -167,7 +167,7 @@ paths:
                     contractCount: 0
                   - id: 4
                     name: '박지민'
-                    gender: 'FEMALE'
+                    gender: 'female'
                     phoneNumber: '010-5555-4444'
                     ageGroup: '40대'
                     region: '부산'
@@ -176,7 +176,7 @@ paths:
                     contractCount: 1
                   - id: 5
                     name: '최성진'
-                    gender: 'MALE'
+                    gender: 'male'
                     phoneNumber: '010-3333-7777'
                     ageGroup: '60대'
                     region: '제주'
@@ -185,7 +185,7 @@ paths:
                     contractCount: 3
                   - id: 6
                     name: '정다은'
-                    gender: 'FEMALE'
+                    gender: 'female'
                     phoneNumber: '010-8888-9999'
                     ageGroup: '30대'
                     region: '대구'
@@ -241,7 +241,7 @@ paths:
               properties:
                 name: { type: 'string', example: '테스트수정' }
                 gender:
-                  { type: string, enum: [MALE, FEMALE], example: 'FEMALE' }
+                  { type: string, enum: [male, female], example: 'female' }
                 phoneNumber: { type: string, example: '010-9999-8888' }
                 ageGroup: { type: string, nullable: true, example: '40대' }
                 region: { type: string, nullable: true, example: '경기' }
@@ -265,7 +265,7 @@ paths:
                     example: '테스트수정'
                   gender:
                     type: string
-                    example: 'FEMALE'
+                    example: 'female'
                   phoneNumber:
                     type: string
                     example: '010-9999-8888'
@@ -340,8 +340,8 @@ components:
           example: '홍길동'
         gender:
           type: string
-          example: MALE
-          enum: [MALE, FEMALE]
+          example: male
+          enum: [male, female]
         phoneNumber:
           type: string
           description: 고객 연락처

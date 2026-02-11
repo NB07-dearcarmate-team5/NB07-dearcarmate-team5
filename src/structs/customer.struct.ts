@@ -62,10 +62,8 @@ export const GetCustomerListParamsStruct = object({
 //고객 생성용 타입
 export const CreateCustomerStruct = object({
   name: pattern(size(string(), 1, 20), /^[a-zA-Z가-힣\s0-9]+$/), //동명이인 방지
-  gender: enums(['MALE', 'FEMALE']),
+  gender: enums(['male', 'female']),
   phoneNumber: pattern(size(string(), 10, 15), /^[0-9-]+$/),
-
-  // 선택적 필드, undefined이면 null 할당
   ageGroup: defaulted(nullable(enums(AGE_GROUPS)), null),
   region: defaulted(nullable(enums(REGIONS)), null),
   email: nonempty(string()),
@@ -74,12 +72,12 @@ export const CreateCustomerStruct = object({
 
 //고객 수정용 타입
 export const UpdateCustomerStruct = object({
-  name: optional(pattern(size(string(), 1, 20), /^[a-zA-Z가-힣\s0-9]+$/)),
-  gender: optional(enums(['MALE', 'FEMALE'])),
-  phoneNumber: optional(pattern(size(string(), 10, 15), /^[0-9-]+$/)),
+  name: pattern(size(string(), 1, 20), /^[a-zA-Z가-힣\s0-9]+$/),
+  gender: enums(['male', 'female']), 
+  phoneNumber: pattern(size(string(), 10, 15), /^[0-9-]+$/),
   ageGroup: optional(nullable(enums(AGE_GROUPS))),
   region: optional(nullable(enums(REGIONS))),
-  email: optional(nonempty(string())),
+  email: nonempty(string()),
   memo: optional(nullable(string())),
 });
 
@@ -87,3 +85,4 @@ export type IdParams = Infer<typeof IdParamsStruct>;
 export type GetCustomerListParams = Infer<typeof GetCustomerListParamsStruct>;
 export type CreateCustomer = Infer<typeof CreateCustomerStruct>;
 export type UpdateCustomer = Infer<typeof UpdateCustomerStruct>;
+

@@ -1,8 +1,8 @@
 import { BadRequestError, NotFoundError } from "../errors/errors";
 import { CustomerDto } from "../models/customer.model";
 import * as customerRepository from '../repositories/customer.repository';
-import { GetCustomerListParams, UpdateCustomer } from "../structs/customer.struct";
-import { CleanCustomer, CreateCustomerRequest, CustomerData, CustomerList } from "../types/customer";
+import { GetCustomerListParams } from "../structs/customer.struct";
+import { CleanCustomer, CreateCustomerRequest, CustomerData, CustomerList, UpdateCustomerRequest } from "../types/customer";
 
 
 async function validateCustomerExists(customerId: number, companyId: number): Promise<CustomerData> {
@@ -72,7 +72,7 @@ export async function getCustomerService(customerId: number, companyId: number):
 export async function updateCustomerService(
   customerId: number, 
   companyId: number, 
-  updateData: UpdateCustomer
+  updateData: UpdateCustomerRequest
 ): Promise<CleanCustomer> {
   await validateCustomerExists(customerId, companyId);
   // 전화번호 수정시 중복 확인

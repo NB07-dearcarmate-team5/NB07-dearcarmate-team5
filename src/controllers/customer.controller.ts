@@ -1,18 +1,21 @@
 import { Request, Response} from 'express';
 import { create } from 'superstruct';
-import { CreateCustomerRequest, CustomerList } from "../types/customer";
+import { CreateCustomerRequest, CustomerList, UpdateCustomerRequest } from "../types/customer";
 import { CreateCustomer, CreateCustomerStruct, GetCustomerListParams, GetCustomerListParamsStruct, IdParams, IdParamsStruct, UpdateCustomer, UpdateCustomerStruct } from '../structs/customer.struct';
 import * as customerService from '../services/customer.service';
+import { Gender } from '@prisma/client';
 
 
 //고객 생성
 export async function createCustomer(req: Request, res: Response) {
   //id가 없는 생성용 
-  const ValidatedData = create(req.body, CreateCustomerStruct,)as CreateCustomer;
+  const validatedData = create(req.body, CreateCustomerStruct,)as CreateCustomer;
   const {userId, companyId} = req.user!;
-
-const result = await customerService.createCustomerService({
-    ...ValidatedData,
+  
+  
+  const result = await customerService.createCustomerService({
+    ...validatedData,
+    gender: validatedData.gender.toUpperCase() as Gender, 
     userId,
     companyId
   } as CreateCustomerRequest);
@@ -44,9 +47,20 @@ export async function getCustomer(req: Request, res: Response) {
 export async function updateCustomer(req: Request, res: Response) {
   const { customerId } = create(req.params, IdParamsStruct) as IdParams;
   const updateData = create(req.body, UpdateCustomerStruct) as UpdateCustomer;
-  const { companyId } = req.user!;
+  const { companyId, userId } = req.user!;
 
-  const result = await customerService.updateCustomerService(customerId, companyId, updateData);
+  const finalUpdateData: UpdateCustomerRequest = {
+    ...updateData,
+    gender: updateData.gender.toUpperCase() as Gender,
+    userId,
+    companyId,
+  };
+
+  const result = await customerService.updateCustomerService(
+    customerId, 
+    companyId, 
+    finalUpdateData
+  );
   res.status(200).json(result);
 }
 

@@ -1,6 +1,5 @@
 import prisma from '../prisma/prisma';
-import { CreateCustomerRequest, CustomerData } from '../types/customer';
-import { UpdateCustomer } from '../structs/customer.struct';
+import { CreateCustomerRequest, CustomerData, UpdateCustomerRequest } from '../types/customer';
 import { Prisma } from '@prisma/client';
 
 type CustomerWithCount = Prisma.CustomerGetPayload<{
@@ -111,15 +110,17 @@ export async function findCustomerById(customerId: number, companyId: number) {
 }
 
 
-export async function updateCustomer(customerId: number, companyId: number, data: UpdateCustomer){
+export async function updateCustomer(customerId: number, companyId: number, data: UpdateCustomerRequest){
 
-  const updateData = Object.fromEntries(
-    Object.entries(data).filter(([_, v]) => v !== undefined)
-  ) as Prisma.CustomerUpdateInput;
+  const { userId, companyId: _, contractCount, ...updatePayload } = data;
 
   const updated = await prisma.customer.update({
-    where: { id : customerId, companyId: companyId },
-    data: updateData,
+    where: { 
+      id: customerId, 
+      companyId: companyId 
+    },
+
+    data: updatePayload as Prisma.CustomerUpdateInput, 
     include: {
       _count: {
         select: { contracts: true },
@@ -127,7 +128,8 @@ export async function updateCustomer(customerId: number, companyId: number, data
     },
   });
 
- return mapToCustomerData(updated);
+
+  return mapToCustomerData(updated);
 }
 
 export async function deleteCustomer(customerId: number, companyId: number) {
