@@ -16,13 +16,13 @@ export class UserController {
   updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user!.userId;
     const updatedUser = await this.userService.updateUser(userId, req.body);
-    return res.status(200).json({ success: true, data: updatedUser });
+    return res.status(200).json(updatedUser);
   };
 
   deleteAccount = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user!.userId;
     const result = await this.userService.deleteUser(userId);
-    return res.status(200).json({ success: true, ...result });
+    return res.status(200).json(result);
   };
 
   deleteUserByAdmin = async (

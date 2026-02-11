@@ -62,15 +62,24 @@ const swaggerOptions: swaggerJsDoc.Options = {
     servers: servers,
   },
   apis: [
-    path.join(__dirname, './docs/*.yaml'),
-    path.join(process.cwd(), './src/docs/*.yaml'),
+    path.join(process.cwd(), './src/docs/swagger.yaml'),
+    path.join(process.cwd(), './src/docs/!(swagger).yaml'),
   ],
 };
 
 const swaggerSpec = swaggerJsDoc(swaggerOptions);
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, undefined, {
+    swaggerOptions: {
+      tagsSorter: undefined,
+      operationsSorter: undefined,
+      defaultModelsExpandDepth: -1,
+    },
+  }),
+);
 // 라우터 설정 (계획서의 routes 폴더 활용)
 app.use('/auth', authRouter);
 app.use('/users', userRouter);
