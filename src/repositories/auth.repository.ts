@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import  prisma  from '../prisma/prisma';
+import prisma from '../prisma/prisma';
 
 export class AuthRepository {
   async findByEmail(email: string) {
@@ -18,6 +18,7 @@ export class AuthRepository {
   async findById(id: number) {
     return await prisma.user.findUnique({
       where: { id },
+      include: { company: true },
     });
   }
 

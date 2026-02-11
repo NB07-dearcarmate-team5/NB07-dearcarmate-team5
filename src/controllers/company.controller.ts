@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { create } from 'superstruct';
 import {
-  CompanyIdParams,
+  UserAndCompanyParams,
   newCompany,
   SearchByCompany,
   SearchByUsers,
@@ -21,7 +21,7 @@ export const createCompany = async (req: Request, res: Response) => {
 
   const company = await createCompanyService(companyName, companyCode);
 
-  res.status(201).json({ data: company });
+  res.status(201).json(company);
 };
 
 // 조회
@@ -30,7 +30,7 @@ export const findCompanies = async (req: Request, res: Response) => {
 
   const companies = await findCompaniesService(validated);
 
-  res.status(200).json({ message: '기업 목록 조회 성공', data: companies });
+  res.status(200).json(companies);
 };
 
 // 회사별 유저 조회
@@ -39,22 +39,22 @@ export const getCompanyUsers = async (req: Request, res: Response) => {
 
   const users = await getCompanyUsersService(validated);
 
-  res.status(200).json({ message: '유저 목록 조회 성공', data: users });
+  res.status(200).json(users);
 };
 
 // 회사 수정
 export const updateCompany = async (req: Request, res: Response) => {
   const validated = create(req.body, UpdateField);
-  const { companyId } = create(req.params, CompanyIdParams);
+  const { companyId } = create(req.params, UserAndCompanyParams);
 
   const updateCompany = await updateCompanyService(validated, companyId);
 
-  res.status(200).json({ data: updateCompany });
+  res.status(200).json(updateCompany);
 };
 
 // 회사 삭제
 export const deleteCompany = async (req: Request, res: Response) => {
-  const { companyId } = create(req.params, CompanyIdParams);
+  const { companyId } = create(req.params, UserAndCompanyParams);
 
   await deleteCompanyService(companyId);
 

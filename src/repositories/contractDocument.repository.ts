@@ -40,7 +40,7 @@ export class ContractDocumentRepository {
           car: { select: { model: true, carNumber: true } },
           customer: { select: { name: true } },
           user: { select: { name: true } },
-          documents: { select: { id: true, fileName: true } },
+          contractDocument: { select: { id: true, fileName: true } },
         },
       }),
       prisma.contract.count({ where }),
@@ -52,10 +52,10 @@ export class ContractDocumentRepository {
       resolutionDate: contract.resolutionDate
         ? contract.resolutionDate.toISOString()
         : '',
-      documentCount: contract.documents.length,
+      documentCount: contract.contractDocument.length,
       userName: contract.user.name,
       carNumber: contract.car.carNumber,
-      documents: contract.documents.map((doc) => ({
+      documents: contract.contractDocument.map((doc: { id: number; fileName: string }) => ({
         id: doc.id,
         fileName: doc.fileName,
       })),

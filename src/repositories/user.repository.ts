@@ -1,11 +1,17 @@
 import { Prisma } from '@prisma/client';
-import { prisma as prisma } from '../prisma/prisma';
+import prisma from '../prisma/prisma';
 
 export class UserRepository {
   async findById(userId: number) {
     return await prisma.user.findUnique({
       where: { id: userId },
-      include: { company: true }, 
+      include: { company: true },
+    });
+  }
+
+  async findByEmployeeNumber(employeeNumber: string) {
+    return await prisma.user.findUnique({
+      where: { employeeNumber },
     });
   }
 

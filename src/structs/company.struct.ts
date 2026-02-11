@@ -9,6 +9,7 @@ import {
   Infer,
   refine,
   min,
+  type,
 } from 'superstruct';
 
 // 생성
@@ -54,7 +55,7 @@ export const UpdateField = refine(UpdateFieldStruct, 'UpdateField', (value) => {
     // undefined가 아니고, 문자열인 경우 공백을 제거했을 때 길이가 0보다 커야 함
     if (v === undefined) return false;
     if (typeof v === 'string') return v.trim().length > 0;
-    return true; // 문자열이 아닌 다른 타입이 있다면 기본적으로 true
+    return true;
   });
   return (
     actualUpdates.length > 0 || '수정할 정보를 최소 하나 이상 입력해야 합니다.'
@@ -63,6 +64,7 @@ export const UpdateField = refine(UpdateFieldStruct, 'UpdateField', (value) => {
 
 export type UpdateFieldType = Infer<typeof UpdateField>;
 
-export const CompanyIdParams = object({
-  companyId: coerce(integer(), string(), (value) => Number(value)),
+export const UserAndCompanyParams = type({
+  companyId: min(integer(), 1),
+  userId: min(integer(), 1),
 });

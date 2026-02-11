@@ -1,0 +1,386 @@
+tags:
+  - name: Customer
+paths:
+  /customers:
+    post:
+      summary: 고객 등록
+      tags:
+        - Customer
+      description: |
+        성명, 성별, 연락처, 이메일은 필수 입력 사항입니다. 
+        연령대, 지역, 메모는 선택 사항입니다.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - gender
+                - phoneNumber
+                - email
+              properties:
+                name:
+                  type: string
+                  example: '홍길동'
+                gender:
+                  type: string
+                  enum: [male, female]
+                  example: 'male'
+                phoneNumber:
+                  type: string
+                  example: '010-1234-5678'
+                ageGroup:
+                  type: string
+                  nullable: true
+                  enum:
+                    [
+                      '10대',
+                      '20대',
+                      '30대',
+                      '40대',
+                      '50대',
+                      '60대',
+                      '70대',
+                      '80대',
+                    ]
+                  description: 연령대 (선택 사항)
+                  example: '30대'
+                region:
+                  type: string
+                  nullable: true
+                  enum:
+                    [
+                      '서울',
+                      '경기',
+                      '인천',
+                      '강원',
+                      '충북',
+                      '충남',
+                      '세종',
+                      '대전',
+                      '전북',
+                      '전남',
+                      '광주',
+                      '경북',
+                      '경남',
+                      '대구',
+                      '울산',
+                      '부산',
+                      '제주',
+                    ]
+                  description: 거주 지역 (선택 사항)
+                  example: '서울'
+                email:
+                  type: string
+                  description: 이메일 주소
+                  example: 'test1@tester.com'
+                memo:
+                  type: string
+                  nullable: true
+                  description: 고객 관련 메모 (선택 사항)
+                  example: '회사원 고객'
+      responses:
+        '201':
+          description: 고객 등록 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    get:
+      summary: 고객 목록 조회 (페이지네이션)
+      tags:
+        - Customer
+      description: 회사에 등록된 고객 목록을 조회합니다. 고객명 또는 이메일로 검색이 가능합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: 현재 페이지 번호
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 10
+          description: 페이지당 고객 수
+        - name: searchBy
+          in: query
+          schema:
+            type: string
+            enum: [name, email]
+          description: 검색 기준
+        - name: keyword
+          in: query
+          schema:
+            type: string
+          description: 검색어
+      responses:
+        '200':
+          description: 고객 목록 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
+              example:
+                currentPage: 1
+                totalPages: 5
+                totalItemCount: 48
+                data:
+                  - id: 1
+                    name: '홍길동'
+                    gender: 'male'
+                    phoneNumber: '010-1234-5678'
+                    ageGroup: '30대'
+                    region: '서울'
+                    email: 'gildong@example.com'
+                    memo: 'VIP 고객, 재방문 의사 높음'
+                    contractCount: 5
+                  - id: 2
+                    name: '김철수'
+                    gender: 'male'
+                    phoneNumber: '010-9988-7766'
+                    ageGroup: '50대'
+                    region: '경기'
+                    email: 'chulsoo.kim@gmail.com'
+                    memo: '법인 차량 리스 문의 중'
+                    contractCount: 12
+                  - id: 3
+                    name: '이영희'
+                    gender: 'female'
+                    phoneNumber: '010-1111-2222'
+                    ageGroup: '20대'
+                    region: '인천'
+                    email: 'younghee20@naver.com'
+                    memo: '신규 면허 취득자, 경차 선호'
+                    contractCount: 0
+                  - id: 4
+                    name: '박지민'
+                    gender: 'female'
+                    phoneNumber: '010-5555-4444'
+                    ageGroup: '40대'
+                    region: '부산'
+                    email: 'jimin_park@kakao.com'
+                    memo: '가족용 SUV 차량 교체 예정'
+                    contractCount: 1
+                  - id: 5
+                    name: '최성진'
+                    gender: 'male'
+                    phoneNumber: '010-3333-7777'
+                    ageGroup: '60대'
+                    region: '제주'
+                    email: 'sj_choi@daum.net'
+                    memo: '은퇴 후 캠핑용 차량 관심'
+                    contractCount: 3
+                  - id: 6
+                    name: '정다은'
+                    gender: 'female'
+                    phoneNumber: '010-8888-9999'
+                    ageGroup: '30대'
+                    region: '대구'
+                    email: 'daeun_j@outlook.com'
+                    memo: '출퇴근용 전기차 상담 완료'
+                    contractCount: 0
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /customers/{customerId}:
+    parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: 고객 ID
+    get:
+      summary: 고객 상세 정보 조회
+      tags:
+        - Customer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 상세 정보 조회 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerRequest'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      summary: 고객 정보 수정
+      tags:
+        - Customer
+      description: 회사에 등록된 고객 정보를 수정합니다.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: 'string', example: '테스트수정' }
+                gender:
+                  { type: string, enum: [male, female], example: 'female' }
+                phoneNumber: { type: string, example: '010-9999-8888' }
+                ageGroup: { type: string, nullable: true, example: '40대' }
+                region: { type: string, nullable: true, example: '경기' }
+                email:
+                  { type: string, nullable: true, example: 'test@example.com' }
+                memo:
+                  { type: string, nullable: true, example: '고객 메모 수정' }
+      responses:
+        '200':
+          description: 고객 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: '12'
+                  name:
+                    type: string
+                    example: '테스트수정'
+                  gender:
+                    type: string
+                    example: 'female'
+                  phoneNumber:
+                    type: string
+                    example: '010-9999-8888'
+                  ageGroup:
+                    type: string
+                    example: '40대'
+                  region:
+                    type: string
+                    example: '경기'
+                  email:
+                    type: string
+                    example: 'test@example.com'
+                  memo:
+                    type: string
+                    example: '고객 메모 수정'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      summary: 고객 정보 삭제
+      tags:
+        - Customer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 고객 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+              example:
+                message: '고객 삭제 성공'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  responses:
+    BadRequest:
+      description: 잘못된 요청입니다
+    Unauthorized:
+      description: 로그인이 필요합니다
+    NotFound:
+      description: 존재하지 않는 고객입니다
+
+  schemas:
+    CustomerRequest:
+      type: object
+      required:
+        - name
+        - gender
+        - phoneNumber
+        - email
+      properties:
+        id:
+          type: integer
+          description: 고객 ID
+          example: 12
+        name:
+          type: string
+          description: 고객 이름
+          example: '홍길동'
+        gender:
+          type: string
+          example: male
+          enum: [male, female]
+        phoneNumber:
+          type: string
+          description: 고객 연락처
+          example: 010-1234-5678
+        ageGroup:
+          type: string
+          example: '30대'
+          enum: ['10대', '20대', '30대', '40대', '50대', '60대', '70대', '80대']
+          description: 연령대
+        region:
+          type: string
+          example: '서울'
+          enum:
+            [
+              '서울',
+              '경기',
+              '인천',
+              '강원',
+              '충북',
+              '충남',
+              '세종',
+              '대전',
+              '전북',
+              '전남',
+              '광주',
+              '경북',
+              '경남',
+              '대구',
+              '울산',
+              '부산',
+              '제주',
+            ]
+          description: 지역
+        email:
+          type: string
+          example: test1@tester.com
+        memo:
+          type: string
+        contractCount:
+          type: integer
+          description: 계약 횟수
+          example: 0

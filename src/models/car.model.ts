@@ -30,6 +30,7 @@ export class CarModel {
   static toEntity(car: PrismaCar): Car {
     return {
       id: car.id,
+      companyId: car.companyId,
       carNumber: car.carNumber,
       manufacturer: car.manufacturer,
       model: car.model,
