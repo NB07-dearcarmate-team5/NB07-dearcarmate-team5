@@ -83,4 +83,8 @@ export interface CarListResponse {
   data: CarListItem[];
 }
 
+export interface CarModel {
+  manufacturer: string;
+  model: string[];
+}
 
