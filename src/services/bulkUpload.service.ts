@@ -3,66 +3,125 @@
  * @author 김민기
  */
 
-// TODO: import
-// import { BulkUploadRepository } from '../repositories/bulkUpload.repository';
-// import { BulkUploadTarget, BulkUploadResponseDto, CSV_LIMITS } from '../types/bulkUpload.type';
-// import { InvalidCsvFormatError, CsvRowLimitExceededError } from '../errors/errorHandler';
-// import csv from 'csv-parser'; // npm install csv-parser
+import { Readable } from 'stream';
+import csvParser from 'csv-parser';
+import { BulkUploadRepository } from '../repositories/bulkUpload.repository';
+import { CustomerCsvRow, VehicleCsvRow, CSV_LIMITS } from '../types/bulkUpload.type';
+import { BadRequestError } from '../errors/errors';
+import { Gender } from '@prisma/client';
 
-// ============================================
-// BulkUploadService
-// ============================================
 export class BulkUploadService {
-  // TODO: 의존성 주입
-  // constructor(private repository: BulkUploadRepository) {}
+  constructor(private repository: BulkUploadRepository) {}
 
-  // ==========================================
-  // CSV 파일 처리 및 대용량 업로드
-  // ==========================================
-  // TODO: processUpload - CSV 파일 파싱 및 데이터 저장
-  // @param target: 'customer' | 'vehicle'
-  // @param file: Express.Multer.File (CSV 파일)
-  // @returns Promise<BulkUploadResponseDto>
-  // 로직:
-  // 1. CSV 파일 파싱
-  // 2. 행 수 제한 검증 (CSV_LIMITS.MAX_ROWS)
-  // 3. 필수 컬럼 검증
-  // 4. target에 따라 repository 호출
-  // 5. 결과 반환 (성공/실패 건수, 에러 상세)
-  async processUpload(target: string, file: any): Promise<any> {
-    // TODO: 구현
-    throw new Error('Not implemented');
+  async processCustomerUpload(
+    file: Express.Multer.File,
+    userId: number,
+    companyId: number
+  ): Promise<{ message: string }> {
+    if (!file) {
+      throw new BadRequestError('잘못된 요청입니다');
+    }
+
+    const rows = await this.parseCsv<CustomerCsvRow>(file.buffer);
+
+    if (rows.length === 0) {
+      throw new BadRequestError('잘못된 요청입니다');
+    }
+
+    if (rows.length > CSV_LIMITS.MAX_ROWS) {
+      throw new BadRequestError('잘못된 요청입니다');
+    }
+
+    const genderMap: Record<string, Gender> = {
+      male: Gender.MALE,
+      female: Gender.FEMALE,
+      MALE: Gender.MALE,
+      FEMALE: Gender.FEMALE,
+    };
+
+    const customers = rows.map((row) => {
+      const result: {
+        name: string;
+        email: string;
+        gender: Gender;
+        phoneNumber: string;
+        region?: string;
+        ageGroup?: string;
+        memo?: string;
+      } = {
+        name: row.name.trim(),
+        email: row.email.trim(),
+        gender: genderMap[row.gender.trim()] || Gender.MALE,
+        phoneNumber: row.phoneNumber.trim(),
+      };
+      if (row.region?.trim()) result.region = row.region.trim();
+      if (row.ageGroup?.trim()) result.ageGroup = row.ageGroup.trim();
+      if (row.memo?.trim()) result.memo = row.memo.trim();
+      return result;
+    });
+
+    await this.repository.bulkCreateCustomers(customers, userId, companyId);
+    return { message: '성공적으로 등록되었습니다' };
   }
 
-  // ==========================================
-  // CSV 파싱
-  // ==========================================
-  // TODO: parseCsv - CSV 파일을 객체 배열로 변환
-  // @param buffer: Buffer - 파일 버퍼
-  // @returns Promise<any[]>
-  private async parseCsv(buffer: Buffer): Promise<any[]> {
-    // TODO: csv-parser 또는 papaparse 사용
-    throw new Error('Not implemented');
+  async processVehicleUpload(
+    file: Express.Multer.File,
+    companyId: number
+  ): Promise<{ message: string }> {
+    if (!file) {
+      throw new BadRequestError('잘못된 요청입니다');
+    }
+
+    const rows = await this.parseCsv<VehicleCsvRow>(file.buffer);
+
+    if (rows.length === 0) {
+      throw new BadRequestError('잘못된 요청입니다');
+    }
+
+    if (rows.length > CSV_LIMITS.MAX_ROWS) {
+      throw new BadRequestError('잘못된 요청입니다');
+    }
+
+    const vehicles = rows.map((row) => {
+      const result: {
+        carNumber: string;
+        manufacturer: string;
+        model: string;
+        type: string;
+        manufacturingYear: number;
+        mileage: number;
+        price: bigint;
+        accidentCount: number;
+        explanation?: string;
+        accidentDetails?: string;
+      } = {
+        carNumber: row.carNumber.trim(),
+        manufacturer: row.manufacturer.trim(),
+        model: row.model.trim(),
+        type: '세단',
+        manufacturingYear: Number(row.manufacturingYear),
+        mileage: Number(row.mileage),
+        price: BigInt(row.price),
+        accidentCount: Number(row.accidentCount) || 0,
+      };
+      if (row.explanation?.trim()) result.explanation = row.explanation.trim();
+      if (row.accidentDetails?.trim()) result.accidentDetails = row.accidentDetails.trim();
+      return result;
+    });
+
+    await this.repository.bulkCreateVehicles(vehicles, companyId);
+    return { message: '성공적으로 등록되었습니다' };
   }
 
-  // ==========================================
-  // 데이터 검증
-  // ==========================================
-  // TODO: validateCustomerRow - 고객 데이터 행 검증
-  // @param row: any
-  // @param rowIndex: number
-  // @returns { valid: boolean, error?: string }
-  private validateCustomerRow(row: any, rowIndex: number): any {
-    // TODO: 필수 필드 검증 (name, email, phone 등)
-    throw new Error('Not implemented');
-  }
-
-  // TODO: validateVehicleRow - 차량 데이터 행 검증
-  // @param row: any
-  // @param rowIndex: number
-  // @returns { valid: boolean, error?: string }
-  private validateVehicleRow(row: any, rowIndex: number): any {
-    // TODO: 필수 필드 검증 (vehicleNumber, model 등)
-    throw new Error('Not implemented');
+  private parseCsv<T>(buffer: Buffer): Promise<T[]> {
+    return new Promise((resolve, reject) => {
+      const results: T[] = [];
+      const stream = Readable.from(buffer);
+      stream
+        .pipe(csvParser())
+        .on('data', (data: T) => results.push(data))
+        .on('end', () => resolve(results))
+        .on('error', (error) => reject(new BadRequestError('잘못된 요청입니다')));
+    });
   }
 }

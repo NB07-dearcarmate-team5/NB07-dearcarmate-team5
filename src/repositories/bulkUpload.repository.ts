@@ -3,39 +3,61 @@
  * @author 김민기
  */
 
-// TODO: import
-// import { CustomerCsvRow, VehicleCsvRow } from '../types/bulkUpload.type';
+import prisma from '../prisma/prisma';
+import { Gender } from '@prisma/client';
 
-// ============================================
-// BulkUploadRepository
-// ============================================
 export class BulkUploadRepository {
-  // TODO: DB 클라이언트 주입 (constructor)
-
-  // ==========================================
-  // 고객 데이터 일괄 등록
-  // ==========================================
-  // TODO: bulkCreateCustomers - 고객 데이터 대량 삽입
-  // @param customers: CustomerCsvRow[]
-  // @returns Promise<{ successCount, failCount, errors }>
-  // 로직:
-  // 1. 트랜잭션 시작
-  // 2. 각 행 검증 및 삽입
-  // 3. 실패 시 해당 행 기록, 계속 진행
-  // 4. 결과 반환
-  async bulkCreateCustomers(customers: any[]): Promise<any> {
-    // TODO: 구현
-    throw new Error('Not implemented');
+  async bulkCreateCustomers(
+    customers: {
+      name: string;
+      email: string;
+      gender: Gender;
+      phoneNumber: string;
+      region?: string;
+      ageGroup?: string;
+      memo?: string;
+    }[],
+    userId: number,
+    companyId: number
+  ): Promise<number> {
+    const result = await prisma.customer.createMany({
+      data: customers.map((c) => ({
+        ...c,
+        userId,
+        companyId,
+        region: c.region || null,
+        ageGroup: c.ageGroup || null,
+        memo: c.memo || null,
+      })),
+      skipDuplicates: true,
+    });
+    return result.count;
   }
 
-  // ==========================================
-  // 차량 데이터 일괄 등록
-  // ==========================================
-  // TODO: bulkCreateVehicles - 차량 데이터 대량 삽입
-  // @param vehicles: VehicleCsvRow[]
-  // @returns Promise<{ successCount, failCount, errors }>
-  async bulkCreateVehicles(vehicles: any[]): Promise<any> {
-    // TODO: 구현
-    throw new Error('Not implemented');
+  async bulkCreateVehicles(
+    vehicles: {
+      carNumber: string;
+      manufacturer: string;
+      model: string;
+      type: string;
+      manufacturingYear: number;
+      mileage: number;
+      price: bigint;
+      accidentCount: number;
+      explanation?: string;
+      accidentDetails?: string;
+    }[],
+    companyId: number
+  ): Promise<number> {
+    const result = await prisma.car.createMany({
+      data: vehicles.map((v) => ({
+        ...v,
+        companyId,
+        explanation: v.explanation || null,
+        accidentDetails: v.accidentDetails || null,
+      })),
+      skipDuplicates: true,
+    });
+    return result.count;
   }
 }
