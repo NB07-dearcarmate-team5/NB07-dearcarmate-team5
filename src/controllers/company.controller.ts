@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { create } from 'superstruct';
 import {
-  UserAndCompanyParams,
+  ValidateCompanyId,
   newCompany,
   SearchByCompany,
   SearchByUsers,
@@ -45,7 +45,7 @@ export const getCompanyUsers = async (req: Request, res: Response) => {
 // 회사 수정
 export const updateCompany = async (req: Request, res: Response) => {
   const validated = create(req.body, UpdateField);
-  const { companyId } = create(req.params, UserAndCompanyParams);
+  const { companyId } = create(req.params, ValidateCompanyId);
 
   const updateCompany = await updateCompanyService(validated, companyId);
 
@@ -54,7 +54,7 @@ export const updateCompany = async (req: Request, res: Response) => {
 
 // 회사 삭제
 export const deleteCompany = async (req: Request, res: Response) => {
-  const { companyId } = create(req.params, UserAndCompanyParams);
+  const { companyId } = create(req.params, ValidateCompanyId);
 
   await deleteCompanyService(companyId);
 

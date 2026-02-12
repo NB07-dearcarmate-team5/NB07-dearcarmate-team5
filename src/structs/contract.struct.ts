@@ -12,7 +12,7 @@ import {
 } from 'superstruct';
 
 // 오전 9시
-const Time0900Pattern = /T09:00:00(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
+const Time0900Pattern = /T09:00:00(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/;
 
 export const CreateContractStruct = object({
   carId: number(),
