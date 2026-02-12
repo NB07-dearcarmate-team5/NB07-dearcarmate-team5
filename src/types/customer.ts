@@ -10,7 +10,7 @@ interface BaseCustomer {
   region: string | null;
   email: string;
   memo: string | null;
-  userId: number; 
+  userId: number | null; 
   companyId: number; 
   contractCount?: number; //응답용 필드
 }
@@ -31,7 +31,7 @@ export interface UpdateCustomerRequest {
   ageGroup?: string | null | undefined;
   region?: string | null | undefined;
   memo?: string | null | undefined;
-  userId: number;
+  userId: number | null;
   companyId: number;
   contractCount?: number| undefined;
 }

@@ -80,7 +80,7 @@ export const updateCompanyService = async (
   await validateCompanyExists(companyId); // 회사 존재 여부 검사
 
   if (companyCode !== undefined) {
-    const existingCompany = await findCompanyByCode(companyCode);
+    const existingCompany = await findCompanyByCode(companyCode, companyId);
 
     if (existingCompany) {
       throw new ConflictError('이미 사용 중인 회사 코드입니다.');
