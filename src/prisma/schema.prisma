@@ -92,8 +92,8 @@ model Customer {
   region      String? // 지역 (선택)
   memo        String?    @db.Text // 메모
   // 관계 설정: 누가(User), 어느 회사(Company)의 고객인지 관리
-  userId      Int // 등록한 사원 ID
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int? // 등록한 사원 ID
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   companyId   Int // 소속 회사 ID
   company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   contracts   Contract[]
@@ -124,8 +124,8 @@ model Contract {
   car        Car       @relation(fields: [carId], references: [id], onDelete: Cascade)
   customerId Int // 선택한 고객
   customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  userId     Int // 담당자 (User)
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int? // 담당자 (User)
+  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   companyId  Int // 회사
   company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   meetings   Meeting[] // 미팅 일정들 (최대 3개)
