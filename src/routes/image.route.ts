@@ -5,7 +5,7 @@ import { BadRequestError } from '../errors/errors';
 
 const router = Router();
 
-router.post('/upload', authenticateToken, upload.single('image'), (req, res) => {
+router.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
   if (!req.file) {
     throw new BadRequestError("잘못된 요청입니다");
   }

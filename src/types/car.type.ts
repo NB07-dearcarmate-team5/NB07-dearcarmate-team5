@@ -7,13 +7,13 @@ export interface Car {
   carNumber: string;
   manufacturer: string;
   model: string;
-  type: CarType;
+  type?: CarType;
   manufacturingYear: number;
   mileage: number;
   price: number;
   accidentCount: number;
-  explanation?: string | null;
-  accidentDetails?: string | null;
+  explanation: string | null;
+  accidentDetails: string | null;
   status: CarStatus;
 }
 
@@ -21,13 +21,13 @@ export interface CreateCarRequestBody {
   carNumber: string;
   manufacturer: string;
   model: string;
-  type: CarType;
+  type?: CarType;
   manufacturingYear: number;
   mileage: number;
   price: number;
   accidentCount: number;
-  explanation?: string;
-  accidentDetails?: string;
+  explanation: string;
+  accidentDetails: string;
 }
 
 export interface CreateCarInput extends CreateCarRequestBody {
@@ -42,8 +42,8 @@ export interface UpdateCarRequestBody {
   mileage: number;
   price: number;
   accidentCount: number;
-  explanation?: string;
-  accidentDetails?: string;
+  explanation: string;
+  accidentDetails: string;
 }
 
 export interface UpdateCarInput extends UpdateCarRequestBody {
