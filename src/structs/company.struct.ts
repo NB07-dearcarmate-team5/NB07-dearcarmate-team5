@@ -68,6 +68,6 @@ export const ValideCompanyId = type({
   companyId: NumberFromString,
 });
 
-export const ValidUserId = type({
+export const ValideUserId = type({
   userId: NumberFromString,
 });

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ContractService } from '../services/contract.service';
 import { create } from 'superstruct';
-import { ValideCompanyId, ValidUserId } from '../structs/company.struct';
+import { ValideCompanyId, ValideUserId } from '../structs/company.struct';
 import {
   CreateContractStruct,
   SearchByContracts,
@@ -20,7 +20,7 @@ export class ContractController {
   // 계약 생성
   createContract = async (req: Request, res: Response) => {
     const { companyId } = create(req.user, ValideCompanyId);
-    const { userId } = create(req.user, ValidUserId);
+    const { userId } = create(req.user, ValideUserId);
     const validated = create(req.body, CreateContractStruct);
 
     const contract = await this.contractService.createContract(
