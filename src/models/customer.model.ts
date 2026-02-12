@@ -10,7 +10,7 @@ export class CustomerDto {
     region: string | null ;
     email: string ;
     memo: string | null ;
-    userId: number;
+    userId: number | null;
     companyId: number;
     contractCount: number;
 
