@@ -24,16 +24,16 @@ export interface CustomerData extends BaseCustomer {
 }
 
 export interface UpdateCustomerRequest {
-  name: string;
-  gender: Gender; 
-  phoneNumber: string;
-  email: string;
+  name?: string| undefined;
+  gender?: Gender| undefined;
+  phoneNumber?: string| undefined;
+  email?: string| undefined;
   ageGroup?: string | null | undefined;
   region?: string | null | undefined;
   memo?: string | null | undefined;
   userId: number;
   companyId: number;
-  contractCount?: number;
+  contractCount?: number| undefined;
 }
 
 //목록 조회 응답 

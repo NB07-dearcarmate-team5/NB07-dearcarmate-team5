@@ -9,6 +9,7 @@ import {
   coerce,
   integer,
   min,
+  nullable
 } from 'superstruct';
 
 export const Email = pattern(
@@ -42,7 +43,7 @@ export const LoginStruct = object({
 
 export const UpdateUserStruct = refine(
   object({
-    imageUrl: optional(size(string(), 1, 1000)),
+    imageUrl: optional(nullable(size(string(), 1, 1000))),
     employeeNumber: optional(size(string(), 1, 100)),
     phoneNumber: optional(Phone),
     password: optional(Password),
