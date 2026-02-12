@@ -10,9 +10,15 @@ export const findCompany = async (companyId: number) => {
 };
 
 // 기업코드 중복 확인용
-export const findCompanyByCode = async (companyCode: string) => {
-  const company = await prisma.company.findUnique({
-    where: { companyCode },
+export const findCompanyByCode = async (
+  companyCode: string,
+  companyId?: number,
+) => {
+  const company = await prisma.company.findFirst({
+    where: {
+      companyCode,
+      ...(companyId && { id: { not: companyId } }),
+    },
   });
 
   return company;
