@@ -21,7 +21,12 @@ export class CarService {
       throw new BadRequestError('잘못된 요청입니다');
     }
 
-    return this.carRepository.create(input);
+    const carData = {
+    ...input,
+    type: input.type ?? '세단'
+  };
+
+    return this.carRepository.create(carData);
   }
 
   async getCars(
