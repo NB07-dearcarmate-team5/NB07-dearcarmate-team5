@@ -1,4 +1,4 @@
-import { object, string, number, enums, size, partial, Infer, Struct, defaulted, coerce, integer, min, create } from 'superstruct';
+import { object, string, number, enums, size, partial, Infer, Struct, defaulted, coerce, integer, min, create, optional} from 'superstruct';
 import { Request, Response, NextFunction } from 'express';
 
 
@@ -9,10 +9,10 @@ const CoercedInteger = coerce(
 );
 
 const Manufacturer = enums(['기아', '쉐보레', '현대', '제네시스', '삼성', '쌍용', '기타']);
-const CarType = enums(['세단', '경차', 'SUV']);
 const CarStatus = enums(['possession', 'contractProceeding', 'contractCompleted']);
 
 export const CreateCarBody = object({
+  companyId: optional(number()),
   carNumber: size(string(), 1, 20),
   manufacturer: Manufacturer,
   model: size(string(), 1, 50),
@@ -26,6 +26,7 @@ export const CreateCarBody = object({
 });
 
 export const UpdateCarBody = partial(object({
+  companyId: optional(number()),
   carNumber: size(string(), 1, 20),
   manufacturer: Manufacturer,
   model: size(string(), 1, 50),
