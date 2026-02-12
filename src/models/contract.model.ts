@@ -23,7 +23,7 @@ export class ContractResponseDto {
     date: Date;
     alarms: string[];
   }[];
-  user: { id: number; name: string };
+  user: { id: number; name: string } | null;
   customer: { id: number; name: string };
   car: { id: number; model: string };
 
@@ -38,7 +38,9 @@ export class ContractResponseDto {
       alarms: m.alarms.map((a) => a.alarmTime.toISOString()), // 명세서 규격
     }));
 
-    this.user = contract.user;
+    this.user = contract.user
+      ? { id: contract.user.id, name: contract.user.name }
+      : null;
     this.customer = contract.customer;
     this.car = { id: contract.car.id, model: contract.car.model };
   }

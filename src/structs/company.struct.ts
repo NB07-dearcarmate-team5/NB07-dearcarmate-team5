@@ -64,7 +64,10 @@ export const UpdateField = refine(UpdateFieldStruct, 'UpdateField', (value) => {
 
 export type UpdateFieldType = Infer<typeof UpdateField>;
 
-export const UserAndCompanyParams = type({
-  companyId: min(integer(), 1),
-  userId: min(integer(), 1),
+export const ValidateCompanyId = type({
+  companyId: NumberFromString,
+});
+
+export const ValidateUserId = type({
+  userId: NumberFromString,
 });
