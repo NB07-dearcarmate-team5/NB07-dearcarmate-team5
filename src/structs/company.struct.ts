@@ -64,8 +64,10 @@ export const UpdateField = refine(UpdateFieldStruct, 'UpdateField', (value) => {
 
 export type UpdateFieldType = Infer<typeof UpdateField>;
 
-// coerce(결과_타입, 입력_타입, 변환_함수)
-export const UserAndCompanyParams = type({
-  companyId: optional(coerce(integer(), string(), (v) => Number(v))),
-  userId: optional(coerce(integer(), string(), (v) => Number(v))),
+export const ValideCompanyId = type({
+  companyId: NumberFromString,
+});
+
+export const ValidUserId = type({
+  userId: NumberFromString,
 });
