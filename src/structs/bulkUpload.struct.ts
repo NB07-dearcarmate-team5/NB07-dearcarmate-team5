@@ -15,7 +15,6 @@ import {
 } from 'superstruct';
 
 const Manufacturer = enums(['기아', '쉐보레', '현대', '제네시스', '삼성', '쌍용', '기타']);
-const CarType = enums(['세단', '경차', 'SUV']);
 const Gender = enums(['male', 'female', 'MALE', 'FEMALE']);
 
 // 콤마 등 비숫자 문자를 제거한 뒤 number로 변환
@@ -30,7 +29,6 @@ export const VehicleCsvRowStruct = object({
   carNumber: size(string(), 1, 20),
   manufacturer: Manufacturer,
   model: size(string(), 1, 50),
-  type: CarType,
   manufacturingYear: NumericString,
   mileage: NumericString,
   price: NumericString,
