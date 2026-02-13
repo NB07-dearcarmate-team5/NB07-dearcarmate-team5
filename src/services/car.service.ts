@@ -12,7 +12,7 @@ import { getCarTypeByModel } from '../utils/car.util';
 export class CarService {
   constructor(private readonly carRepository: CarRepository) {}
 
-  async createCar(input: CreateCarInput & { companyId: number }): Promise<Car> {
+  async createCar(input: CreateCarInput & { companyId: number ;type?: string }): Promise<Car> {
     const exists = await this.carRepository.existsByCompanyIdAndCarNumber(
       input.companyId,
       input.carNumber,
@@ -59,7 +59,7 @@ export class CarService {
   }
 
   async updateCar(
-  input: UpdateCarInput & { carId: number; companyId: number },
+  input: UpdateCarInput & { carId: number; companyId: number; type?: string },
 ): Promise<Car> {
   const { carId, companyId } = input;
   
