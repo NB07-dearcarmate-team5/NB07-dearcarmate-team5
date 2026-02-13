@@ -5,8 +5,10 @@
 
 import { Readable } from 'stream';
 import csvParser from 'csv-parser';
+import { create } from 'superstruct';
 import { BulkUploadRepository } from '../repositories/bulkUpload.repository';
 import { CustomerCsvRow, VehicleCsvRow, CSV_LIMITS } from '../types/bulkUpload.type';
+import { VehicleCsvRowStruct, CustomerCsvRowStruct } from '../structs/bulkUpload.struct';
 import { BadRequestError } from '../errors/errors';
 import { Gender } from '@prisma/client';
 
@@ -39,7 +41,13 @@ export class BulkUploadService {
       FEMALE: Gender.FEMALE,
     };
 
-    const customers = rows.map((row) => {
+    const customers = rows.map((row, index) => {
+      try {
+        create(row, CustomerCsvRowStruct);
+      } catch {
+        throw new BadRequestError(`${index + 1}번째 행의 데이터가 유효하지 않습니다`);
+      }
+
       const result: {
         name: string;
         email: string;
@@ -82,7 +90,14 @@ export class BulkUploadService {
       throw new BadRequestError('잘못된 요청입니다');
     }
 
-    const vehicles = rows.map((row) => {
+    const vehicles = rows.map((row, index) => {
+      let validated;
+      try {
+        validated = create(row, VehicleCsvRowStruct);
+      } catch {
+        throw new BadRequestError(`${index + 1}번째 행의 데이터가 유효하지 않습니다`);
+      }
+
       const result: {
         carNumber: string;
         manufacturer: string;
@@ -95,13 +110,13 @@ export class BulkUploadService {
         explanation?: string;
         accidentDetails?: string;
       } = {
-        carNumber: row.carNumber.trim(),
-        manufacturer: row.manufacturer.trim(),
-        model: row.model.trim(),
-        type: '세단',
-        manufacturingYear: Number(row.manufacturingYear),
-        mileage: Number(row.mileage),
-        price: BigInt(row.price),
+        carNumber: validated.carNumber.trim(),
+        manufacturer: validated.manufacturer,
+        model: validated.model.trim(),
+        type: validated.type,
+        manufacturingYear: validated.manufacturingYear,
+        mileage: validated.mileage,
+        price: BigInt(Math.floor(validated.price)),
         accidentCount: Number(row.accidentCount) || 0,
       };
       if (row.explanation?.trim()) result.explanation = row.explanation.trim();
