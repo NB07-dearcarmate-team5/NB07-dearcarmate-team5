@@ -16,11 +16,12 @@ export interface CustomerCsvRow {
   memo?: string;
 }
 
-// 차량 CSV 행 (carNumber,manufacturer,model,manufacturingYear,mileage,price,accidentCount,explanation,accidentDetails)
+// 차량 CSV 행 (carNumber,manufacturer,model,type,manufacturingYear,mileage,price,accidentCount,explanation,accidentDetails)
 export interface VehicleCsvRow {
   carNumber: string;
   manufacturer: string;
   model: string;
+  type: string;
   manufacturingYear: string;
   mileage: string;
   price: string;
