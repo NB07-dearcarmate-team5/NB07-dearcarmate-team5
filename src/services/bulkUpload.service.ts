@@ -10,6 +10,7 @@ import { BulkUploadRepository } from '../repositories/bulkUpload.repository';
 import { CustomerCsvRow, VehicleCsvRow, CSV_LIMITS } from '../types/bulkUpload.type';
 import { VehicleCsvRowStruct, CustomerCsvRowStruct } from '../structs/bulkUpload.struct';
 import { BadRequestError } from '../errors/errors';
+import { getCarTypeByModel } from '../utils/car.util';
 import { Gender } from '@prisma/client';
 
 export class BulkUploadService {
@@ -113,7 +114,7 @@ export class BulkUploadService {
         carNumber: validated.carNumber.trim(),
         manufacturer: validated.manufacturer,
         model: validated.model.trim(),
-        type: validated.type,
+        type: getCarTypeByModel(validated.model),
         manufacturingYear: validated.manufacturingYear,
         mileage: validated.mileage,
         price: BigInt(Math.floor(validated.price)),
