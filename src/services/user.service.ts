@@ -90,20 +90,22 @@ export class UserService {
   }
 
   async deleteUser(userId: number) {
-    const user = await this.isUser(userId);
+    const user = await this.userRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundError('존재하지 않는 사용자입니다.');
+    }
 
     if (user.imageUrl) {
       this.deleteProfileImageFile(user.imageUrl);
     }
-    // 트랜잭션 시작
+
     await prisma.$transaction(async (tx) => {
-      // 후임자 찾기
       const successor = await this.userRepository.findSuccessor(
         userId,
         user.companyId,
         tx,
       );
-      // 후임자가 있으면 계약 이관, 없으면 계약 존재 여부 확인 후 삭제
       if (successor) {
         await this.contractRepo.changeContractUser(userId, successor.id, tx);
       } else {
@@ -114,23 +116,8 @@ export class UserService {
           );
         }
       }
-      await this.userRepository.deleteUser(userId, tx);
+      await this.userRepository.delete(userId, tx);
     });
-    return { message: '유저 삭제 성공' };
-  }
-
-  async deleteUserByAdmin(targetUserId: number) {
-    const targetUser = await this.userRepository.findById(targetUserId);
-
-    if (!targetUser) {
-      throw new NotFoundError('존재하지 않는 사용자입니다.');
-    }
-
-    if (targetUser.imageUrl) {
-      this.deleteProfileImageFile(targetUser.imageUrl);
-    }
-
-    await this.userRepository.delete(targetUserId);
     return { message: '유저 삭제 성공' };
   }
 }
