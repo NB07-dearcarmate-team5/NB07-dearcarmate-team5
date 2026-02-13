@@ -35,7 +35,7 @@ export class UserController {
     }
 
     const { userId } = create(req.params, UserIdParamStruct);
-    const result = await this.userService.deleteUserByAdmin(userId);
+    const result = await this.userService.deleteUser(userId);
     res.status(200).json(result);
   };
 }

@@ -23,9 +23,20 @@ export class UserRepository {
     });
   }
 
-  async delete(userId: number) {
-    return await prisma.user.delete({
+  async delete(userId: number, tx: Prisma.TransactionClient) {
+    return await tx.user.delete({
       where: { id: userId },
+    });
+  }
+
+  async findSuccessor(
+    userId: number,
+    companyId: number,
+    tx: Prisma.TransactionClient,
+  ) {
+    return await tx.user.findFirst({
+      where: { companyId, id: { not: userId } },
+      orderBy: { id: 'asc' },
     });
   }
 }
