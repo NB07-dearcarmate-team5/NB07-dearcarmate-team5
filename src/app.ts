@@ -14,6 +14,7 @@ import customersRouter from './routes/customer.route';
 import contractRouter from './routes/contract.route';
 import { PORT } from './utils/constants';
 import imageRouter from './routes/image.route';
+import contractDocumentRouter from './routes/contractDocument.route';
 import dashboardRouter from './routes/dashboard.route';
 import cors from 'cors';
 
@@ -89,6 +90,7 @@ app.use('/contracts', contractRouter);
 app.use('/cars', carRoutes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/images', imageRouter);
+app.use('/contractDocuments', contractDocumentRouter);
 app.use('/dashboard', dashboardRouter);
 
 // 3. 에러 핸들러 (모든 라우터 뒤에 위치)

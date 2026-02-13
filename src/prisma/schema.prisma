@@ -129,9 +129,23 @@ model Contract {
   companyId  Int // 회사
   company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   meetings   Meeting[] // 미팅 일정들 (최대 3개)
-  contractDocument ContractDocument[]
+  contractDocument ContractDocument[] // 계약서 문서들
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
+}
+
+//계약서 문서 정보
+model ContractDocument {
+  id         Int      @id @default(autoincrement())
+  fileName   String // 원본 파일명
+  fileKey    String // S3/MinIO 저장 키
+  fileSize   Int // 파일 크기 (bytes)
+  mimeType   String // MIME 타입
+
+  contractId Int
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Meeting {
@@ -154,11 +168,3 @@ model Alarm {
   updated_at DateTime @updatedAt
 }
 
-model ContractDocument {
-  id         Int      @id @default(autoincrement())
-  fileName   String
-  fileUrl    String
-  // 처음 업로드 시에는 null이었다가, 계약 수정 시 값이 채워짐
-  contractId Int?     
-  contract   Contract? @relation(fields: [contractId], references: [id])
-}
