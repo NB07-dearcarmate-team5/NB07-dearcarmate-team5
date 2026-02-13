@@ -59,7 +59,7 @@ export class CarController {
     next: NextFunction,
   ): Promise<void> => {
     const { carId } = req.params as unknown as CarIdParamsType;
-    const body = req.body as UpdateCarBodyType;
+    const body = req.body as UpdateCarBodyType & { type?: string };
     const companyId = req.user!.companyId;
     const result = await this.carService.updateCar({
       ...body,
