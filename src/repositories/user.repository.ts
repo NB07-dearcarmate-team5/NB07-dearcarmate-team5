@@ -28,4 +28,21 @@ export class UserRepository {
       where: { id: userId },
     });
   }
+
+  async findSuccessor(
+    userId: number,
+    companyId: number,
+    tx: Prisma.TransactionClient,
+  ) {
+    return await tx.user.findFirst({
+      where: { companyId, id: { not: userId } },
+      orderBy: { id: 'asc' },
+    });
+  }
+
+  async deleteUser(userId: number, tx: Prisma.TransactionClient) {
+    return await tx.user.delete({
+      where: { id: userId },
+    });
+  }
 }

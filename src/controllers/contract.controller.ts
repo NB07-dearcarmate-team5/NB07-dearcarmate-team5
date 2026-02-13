@@ -47,9 +47,11 @@ export class ContractController {
   //계약 수정
   updateContract = async (req: Request, res: Response) => {
     const { contractId } = create(req.params, ContractIdParam);
+    const { userId } = create(req.user, ValidateUserId);
     const validated = create(req.body, UpdateContractData);
     const contract = await this.contractService.updateContract(
       contractId,
+      userId,
       validated,
     );
 

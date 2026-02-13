@@ -83,10 +83,18 @@ export class ContractService {
   };
 
   // 계약 수정
-  updateContract = async (contractId: number, params: UpdateContract) => {
+  updateContract = async (
+    contractId: number,
+    userId: number,
+    params: UpdateContract,
+  ) => {
     const oldContract = await this.validateContract(contractId);
     const oldCarId = oldContract.carId;
     const newCarId = params.carId;
+
+    if (oldContract.userId !== userId) {
+      throw new BadRequestError('담당자만 수정이 가능합니다.');
+    }
 
     if (Object.keys(params).length === 0) {
       throw new BadRequestError('수정할 데이터가 최소 한개이상 있어야 합니다.');

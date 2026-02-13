@@ -136,6 +136,25 @@ export class ContractRepo {
     });
   };
 
+  // 담당자 변경(유저 삭제 시)
+  changeContractUser = async (
+    userId: number,
+    successorId: number,
+    tx: Prisma.TransactionClient,
+  ) => {
+    await tx.contract.updateMany({
+      where: { userId },
+      data: { userId: successorId },
+    });
+  };
+
+  // 특정 유저의 계약 수 조회
+  async countByUserId(userId: number, tx: Prisma.TransactionClient) {
+    return await tx.contract.count({
+      where: { userId },
+    });
+  }
+
   // 계약 삭제
   deleteContract = async (tx: Prisma.TransactionClient, contractId: number) => {
     await tx.contract.delete({
